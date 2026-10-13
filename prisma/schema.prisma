@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum ResourceType {
+  ROOM
+  EQUIPMENT
+  VEHICLE
+  OTHER
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum WaitlistStatus {
+  WAITING
+  NOTIFIED
+}
+
+model User {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  email      String   @unique
+  phone      String?
+  password   String   // bcrypt hash, never sent to the browser
+  role       Role     @default(MEMBER)
+  department String?
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  reservations          Reservation[]   @relation("ReservationOwner")
+  cancelledReservations Reservation[]   @relation("ReservationCanceller")
+  waitlistEntries       WaitlistEntry[]
+  notifications         Notification[]
+
+  @@map("users")
+}
+
+model Resource {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String       @unique
+  type        ResourceType
+  location    String
+  capacity    Int?
+  description String?
+  isActive    Boolean      @default(true) @map("is_active")
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  reservations    Reservation[]
+  waitlistEntries WaitlistEntry[]
+
+  @@map("resources")
+}
+
+model Reservation {
+  id            String            @id @default(uuid()) @db.Uuid
+  resourceId    String            @map("resource_id") @db.Uuid
+  userId        String            @map("user_id") @db.Uuid
+  startTime     DateTime          @map("start_time") @db.Timestamptz
+  endTime       DateTime          @map("end_time") @db.Timestamptz
+  purpose       String
+  status        ReservationStatus @default(CONFIRMED)
+  cancelledAt   DateTime?         @map("cancelled_at") @db.Timestamptz
+  cancelledById String?           @map("cancelled_by_id") @db.Uuid
+  cancelReason  String?           @map("cancel_reason")
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz
+
+  resource    Resource @relation(fields: [resourceId], references: [id])
+  user        User     @relation("ReservationOwner", fields: [userId], references: [id])
+  cancelledBy User?    @relation("ReservationCanceller", fields: [cancelledById], references: [id])
+
+  @@index([resourceId, startTime])
+  @@index([userId])
+  @@map("reservations")
+}
+
+model WaitlistEntry {
+  id         String         @id @default(uuid()) @db.Uuid
+  userId     String         @map("user_id") @db.Uuid
+  resourceId String         @map("resource_id") @db.Uuid
+  startTime  DateTime       @map("start_time") @db.Timestamptz
+  endTime    DateTime       @map("end_time") @db.Timestamptz
+  status     WaitlistStatus @default(WAITING)
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz
+
+  user     User     @relation(fields: [userId], references: [id])
+  resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@unique([userId, resourceId, startTime, endTime])
+  @@index([resourceId, status])
+  @@map("waitlist_entries")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  message   String
+  link      String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}

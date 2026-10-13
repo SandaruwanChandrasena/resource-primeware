@@ -2,6 +2,7 @@
   "name": "resource-primeware",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,6 +12,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.7",
     "next": "16.4.0",
     "pg": "^8.23.1",
