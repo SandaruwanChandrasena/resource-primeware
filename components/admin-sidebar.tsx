@@ -4,11 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
 import AppLogo from "@/components/app-logo";
-import { DashboardIcon, LogoutIcon } from "@/components/app-icons";
+import { DashboardIcon, LogoutIcon, ResourcesIcon } from "@/components/app-icons";
 import { getInitials } from "@/lib/user-display";
 
 // Add one line here when a new admin page is built (D48).
-const NAV_ITEMS = [{ href: "/admin", label: "Dashboard", icon: DashboardIcon }];
+const NAV_ITEMS = [
+  { href: "/admin", label: "Dashboard", icon: DashboardIcon },
+  { href: "/admin/resources", label: "Resources", icon: ResourcesIcon },
+];
 
 // "/admin" must match exactly; other links also match their sub-pages.
 function isActive(pathname: string, href: string) {
