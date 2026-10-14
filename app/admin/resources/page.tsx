@@ -1,9 +1,15 @@
 import Link from "next/link";
 import { setResourceActive } from "@/actions/resources";
-import { EquipmentIcon, PlusIcon, ResourcesIcon, RoomIcon, VehicleIcon } from "@/components/app-icons";
+import {
+  EquipmentIcon,
+  PlusIcon,
+  ResourcesIcon,
+  RoomIcon,
+  VehicleIcon,
+} from "@/components/app-icons";
 import ConfirmButton from "@/components/confirm-button";
 import FilterTabs from "@/components/filter-tabs";
-import ResourceFilters from "@/components/resource-filters";
+import SearchFilters from "@/components/search-filters";
 import SortSelect from "@/components/sort-select";
 import StatusPill from "@/components/status-pill";
 import SubmitButton from "@/components/submit-button";
@@ -11,7 +17,11 @@ import TablePagination from "@/components/table-pagination";
 import type { Prisma, ResourceType } from "@/generated/prisma/client";
 import { requireAdmin } from "@/lib/auth-guard";
 import { db } from "@/lib/db";
-import { RESOURCE_SORT_LABELS, RESOURCE_TYPE_LABELS, type ResourceSort } from "@/lib/resource-types";
+import {
+  RESOURCE_SORT_LABELS,
+  RESOURCE_TYPE_LABELS,
+  type ResourceSort,
+} from "@/lib/resource-types";
 import { resourceFilterSchema } from "@/lib/validation";
 
 export const metadata = { title: "Resources | Resource Reservation" };
@@ -35,16 +45,25 @@ const TYPE_ICONS: Record<ResourceType, typeof RoomIcon> = {
 const TOGGLE_CLASS =
   "flex w-24 items-center justify-center rounded-lg border px-3 py-1.5 text-xs font-medium disabled:opacity-60";
 
-type AdminResourcesPageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+type AdminResourcesPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-export default async function AdminResourcesPage({ searchParams }: AdminResourcesPageProps) {
+export default async function AdminResourcesPage({
+  searchParams,
+}: AdminResourcesPageProps) {
   await requireAdmin();
-  const { q, type, status, sort, page, size } = resourceFilterSchema.parse(await searchParams);
+  const { q, type, status, sort, page, size } = resourceFilterSchema.parse(
+    await searchParams,
+  );
 
   // Search + type apply to every tab; the tab adds the status.
   const baseWhere: Prisma.ResourceWhereInput = {
     ...(q && {
-      OR: [{ name: { contains: q, mode: "insensitive" } }, { location: { contains: q, mode: "insensitive" } }],
+      OR: [
+        { name: { contains: q, mode: "insensitive" } },
+        { location: { contains: q, mode: "insensitive" } },
+      ],
     }),
     ...(type && { type }),
   };
@@ -53,7 +72,12 @@ export default async function AdminResourcesPage({ searchParams }: AdminResource
     db.resource.count({ where: { ...baseWhere, isActive: true } }),
   ]);
   const inactiveCount = allCount - activeCount;
-  const total = status === "active" ? activeCount : status === "inactive" ? inactiveCount : allCount;
+  const total =
+    status === "active"
+      ? activeCount
+      : status === "inactive"
+        ? inactiveCount
+        : allCount;
 
   // A page number past the end goes to the last page.
   const totalPages = Math.max(1, Math.ceil(total / size));
@@ -68,7 +92,11 @@ export default async function AdminResourcesPage({ searchParams }: AdminResource
     include: {
       // Future confirmed bookings (D50).
       _count: {
-        select: { reservations: { where: { status: "CONFIRMED", startTime: { gte: new Date() } } } },
+        select: {
+          reservations: {
+            where: { status: "CONFIRMED", startTime: { gte: new Date() } },
+          },
+        },
       },
     },
   });
@@ -79,7 +107,9 @@ export default async function AdminResourcesPage({ searchParams }: AdminResource
     <section className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Resources</h1>
-        <p className="mt-1 text-sm text-gray-500">Rooms, equipment and vehicles that people can book.</p>
+        <p className="mt-1 text-sm text-gray-500">
+          Rooms, equipment and vehicles that people can book.
+        </p>
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white">
@@ -94,7 +124,17 @@ export default async function AdminResourcesPage({ searchParams }: AdminResource
         />
 
         <div className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <ResourceFilters q={q} type={type ?? ""} />
+          <SearchFilters
+            q={q}
+            placeholder="Search name or location"
+            filter={{
+              param: "type",
+              label: "Filter by type",
+              allLabel: "All types",
+              value: type ?? "",
+              options: RESOURCE_TYPE_LABELS,
+            }}
+          />
           <Link
             href="/admin/resources/new"
             className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
@@ -132,25 +172,39 @@ export default async function AdminResourcesPage({ searchParams }: AdminResource
                       <div className="flex items-center gap-3">
                         <span
                           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                            r.isActive ? "bg-brand-50 text-brand-700" : "bg-gray-100 text-gray-400"
+                            r.isActive
+                              ? "bg-brand-50 text-brand-700"
+                              : "bg-gray-100 text-gray-400"
                           }`}
                         >
                           <TypeIcon className="h-4 w-4" />
                         </span>
                         <div className="min-w-0">
-                          <div className="font-medium text-gray-900">{r.name}</div>
+                          <div className="font-medium text-gray-900">
+                            {r.name}
+                          </div>
                           {r.description && (
-                            <div className="max-w-xs truncate text-xs text-gray-500">{r.description}</div>
+                            <div className="max-w-xs truncate text-xs text-gray-500">
+                              {r.description}
+                            </div>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3">{RESOURCE_TYPE_LABELS[r.type]}</td>
-                    <td className="whitespace-nowrap px-4 py-3">{r.location}</td>
-                    <td className="px-4 py-3 tabular-nums">{r.capacity ?? "—"}</td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {RESOURCE_TYPE_LABELS[r.type]}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {r.location}
+                    </td>
+                    <td className="px-4 py-3 tabular-nums">
+                      {r.capacity ?? "—"}
+                    </td>
                     <td className="px-4 py-3 tabular-nums">{upcoming}</td>
                     <td className="px-4 py-3">
-                      <StatusPill tone={r.isActive ? "green" : "gray"}>{r.isActive ? "Active" : "Inactive"}</StatusPill>
+                      <StatusPill tone={r.isActive ? "green" : "gray"}>
+                        {r.isActive ? "Active" : "Inactive"}
+                      </StatusPill>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
@@ -176,7 +230,9 @@ export default async function AdminResourcesPage({ searchParams }: AdminResource
                           />
                         ) : (
                           // Activate is safe and easy to undo, so no confirm box.
-                          <form action={setResourceActive.bind(null, r.id, true)}>
+                          <form
+                            action={setResourceActive.bind(null, r.id, true)}
+                          >
                             <SubmitButton
                               className={`${TOGGLE_CLASS} border-brand-100 bg-white text-brand-700 hover:bg-brand-50`}
                             >
@@ -193,7 +249,9 @@ export default async function AdminResourcesPage({ searchParams }: AdminResource
           </table>
           {resources.length === 0 && (
             <p className="px-4 py-10 text-center text-sm text-gray-500">
-              {allCount === 0 && !q && !type ? "No resources yet." : "No resources match your search."}
+              {allCount === 0 && !q && !type
+                ? "No resources yet."
+                : "No resources match your search."}
             </p>
           )}
         </div>
@@ -203,7 +261,11 @@ export default async function AdminResourcesPage({ searchParams }: AdminResource
             <span className="tabular-nums">
               Showing {from}–{to} of {total}
             </span>
-            <SortSelect options={RESOURCE_SORT_LABELS} value={sort} defaultValue="oldest" />
+            <SortSelect
+              options={RESOURCE_SORT_LABELS}
+              value={sort}
+              defaultValue="oldest"
+            />
           </div>
           <TablePagination page={currentPage} pageSize={size} total={total} />
         </div>

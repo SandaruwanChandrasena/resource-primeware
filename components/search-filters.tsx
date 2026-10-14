@@ -3,16 +3,19 @@
 import { useRef } from "react";
 import { SearchIcon } from "@/components/app-icons";
 import Spinner from "@/components/spinner";
-import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
 import { useUrlQuery } from "@/lib/url-query";
 
-type ResourceFiltersProps = { q: string; type: string };
+type SearchFiltersProps = {
+  q: string;
+  placeholder: string;
+  filter: { param: string; label: string; allLabel: string; value: string; options: Record<string, string> };
+};
 
 const fieldClass =
   "rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100";
 
-// Search box + type filter. Values live in the URL.
-export default function ResourceFilters({ q, type }: ResourceFiltersProps) {
+// Reusable: search box + one dropdown filter. Values live in the URL.
+export default function SearchFilters({ q, placeholder, filter }: SearchFiltersProps) {
   const { update, pending } = useUrlQuery();
   const formRef = useRef<HTMLFormElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -25,7 +28,7 @@ export default function ResourceFilters({ q, type }: ResourceFiltersProps) {
     const data = new FormData(form);
     update({
       q: String(data.get("q") ?? "").trim() || undefined,
-      type: String(data.get("type") ?? "") || undefined,
+      [filter.param]: String(data.get(filter.param) ?? "") || undefined,
       page: undefined,
     });
   }
@@ -40,7 +43,7 @@ export default function ResourceFilters({ q, type }: ResourceFiltersProps) {
     const form = formRef.current;
     if (!form) return;
     (form.elements.namedItem("q") as HTMLInputElement).value = "";
-    (form.elements.namedItem("type") as HTMLSelectElement).value = "";
+    (form.elements.namedItem(filter.param) as HTMLSelectElement).value = "";
     apply();
   }
 
@@ -62,8 +65,8 @@ export default function ResourceFilters({ q, type }: ResourceFiltersProps) {
           defaultValue={q}
           onChange={applySoon}
           maxLength={80}
-          placeholder="Search name or location"
-          aria-label="Search resources"
+          placeholder={placeholder}
+          aria-label={placeholder}
           className={`${fieldClass} w-full pl-9`}
         />
       </div>
@@ -77,26 +80,22 @@ export default function ResourceFilters({ q, type }: ResourceFiltersProps) {
       </button>
 
       <select
-        name="type"
-        defaultValue={type}
+        name={filter.param}
+        defaultValue={filter.value}
         onChange={apply}
-        aria-label="Filter by type"
+        aria-label={filter.label}
         className={fieldClass}
       >
-        <option value="">All types</option>
-        {Object.entries(RESOURCE_TYPE_LABELS).map(([value, label]) => (
+        <option value="">{filter.allLabel}</option>
+        {Object.entries(filter.options).map(([value, label]) => (
           <option key={value} value={value}>
             {label}
           </option>
         ))}
       </select>
 
-      {(q || type) && (
-        <button
-          type="button"
-          onClick={clearAll}
-          className="px-2 py-2 text-sm font-medium text-brand-700 hover:underline"
-        >
+      {(q || filter.value) && (
+        <button type="button" onClick={clearAll} className="px-2 py-2 text-sm font-medium text-brand-700 hover:underline">
           Clear
         </button>
       )}

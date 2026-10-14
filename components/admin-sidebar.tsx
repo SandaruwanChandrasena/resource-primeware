@@ -8,6 +8,7 @@ import {
   DashboardIcon,
   LogoutIcon,
   ResourcesIcon,
+  UsersIcon,
 } from "@/components/app-icons";
 import SubmitButton from "@/components/submit-button";
 import { getInitials } from "@/lib/user-display";
@@ -16,6 +17,7 @@ import { getInitials } from "@/lib/user-display";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: DashboardIcon },
   { href: "/admin/resources", label: "Resources", icon: ResourcesIcon },
+  { href: "/admin/users", label: "Users", icon: UsersIcon },
 ];
 
 // "/admin" must match exactly; other links also match their sub-pages.

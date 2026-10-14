@@ -1,7 +1,8 @@
 import { z } from "zod";
-import { ResourceType } from "@/generated/prisma/client";
+import { ResourceType, Role } from "@/generated/prisma/client";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from "@/lib/pagination";
 import { RESOURCE_SORTS } from "@/lib/resource-types";
+import { USER_SORTS } from "@/lib/user-display";
 
 // Clean the email first, then check that it looks like an email.
 export const loginSchema = z.object({
@@ -45,15 +46,81 @@ export const resourceSchema = z.object({
 
 export type ResourceInput = z.infer<typeof resourceSchema>;
 
+// Page and rows-per-page from the URL. Bad values fall back to defaults.
+const pageFields = {
+  page: z.coerce.number().int().min(1).catch(1),
+  size: z.coerce
+    .number()
+    .refine((n) => (PAGE_SIZES as readonly number[]).includes(n))
+    .catch(DEFAULT_PAGE_SIZE),
+};
+
 // URL filters for the resources list. Bad values fall back to defaults.
 export const resourceFilterSchema = z.object({
   q: z.string().trim().max(80).catch(""),
   type: z.enum(ResourceType).optional().catch(undefined),
   status: z.enum(["active", "inactive"]).optional().catch(undefined),
   sort: z.enum(RESOURCE_SORTS).catch("oldest"),
-  page: z.coerce.number().int().min(1).catch(1),
-  size: z.coerce
-    .number()
-    .refine((n) => (PAGE_SIZES as readonly number[]).includes(n))
-    .catch(DEFAULT_PAGE_SIZE),
+  ...pageFields,
+});
+
+// Fields shared by Add user and Edit user.
+const userFields = {
+  name: z
+    .string()
+    .trim()
+    .min(2, "Name must be at least 2 characters.")
+    .max(80, "Name is too long (max 80)."),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(120, "Email is too long.")
+    .pipe(z.email("Enter a valid email.")),
+  // Text, so a leading 0 or +94 is kept (D25).
+  phone: z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .trim()
+      .regex(
+        /^\+?[0-9]{9,12}$/,
+        "Use digits only, e.g. 0712345678 or +94712345678.",
+      )
+      .nullable(),
+  ),
+  department: z.preprocess(
+    emptyToNull,
+    z.string().trim().max(60, "Department is too long (max 60).").nullable(),
+  ),
+  role: z.enum(Role, { error: "Choose a role." }),
+};
+
+// bcrypt only uses the first 72 bytes, so 72 is the max.
+const passwordRule = z
+  .string()
+  .min(8, "Password must be at least 8 characters.")
+  .max(72, "Password is too long (max 72).");
+
+// Add: password is required.
+export const userCreateSchema = z.object({
+  ...userFields,
+  password: passwordRule,
+});
+
+// Edit: empty password = keep the old one.
+export const userUpdateSchema = z.object({
+  ...userFields,
+  password: z.preprocess(emptyToNull, passwordRule.nullable()),
+});
+
+export type UserInput = z.infer<typeof userCreateSchema>;
+
+// URL filters for the users list.
+export const userFilterSchema = z.object({
+  q: z.string().trim().max(80).catch(""),
+  role: z.enum(Role).optional().catch(undefined),
+  status: z.enum(["active", "inactive"]).optional().catch(undefined),
+  sort: z.enum(USER_SORTS).catch("oldest"),
+  ...pageFields,
 });
