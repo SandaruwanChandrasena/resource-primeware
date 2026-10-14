@@ -1,4 +1,4 @@
-import AdminSidebar from "@/components/admin-sidebar";
+import AdminSidebar from "@/components/layout/admin-sidebar";
 import { requireAdmin } from "@/lib/auth-guard";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

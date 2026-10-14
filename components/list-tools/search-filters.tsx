@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { SearchIcon } from "@/components/app-icons";
-import PendingLabel from "@/components/pending-label";
-import SelectMenu, { toOptions } from "@/components/select-menu";
+import { SearchIcon } from "@/components/layout/app-icons";
+import PendingLabel from "@/components/ui/pending-label";
+import SelectMenu, { toOptions } from "@/components/ui/select-menu";
 import { useUrlQuery } from "@/lib/url-query";
 
 type SearchFiltersProps = {

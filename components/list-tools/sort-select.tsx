@@ -1,6 +1,6 @@
 "use client";
 
-import SelectMenu, { toOptions } from "@/components/select-menu";
+import SelectMenu, { toOptions } from "@/components/ui/select-menu";
 import { useUrlQuery } from "@/lib/url-query";
 
 type SortSelectProps = {

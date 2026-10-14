@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import BookingForm from "@/components/booking-form";
-import ResourcePhoto from "@/components/resource-photo";
+import BookingForm from "@/components/forms/booking-form";
+import ResourcePhoto from "@/components/ui/resource-photo";
 import { requireMember } from "@/lib/auth-guard";
 import { CLOSE_TIME, MAX_DAYS_AHEAD, OPEN_TIME } from "@/lib/booking-settings";
 import { addDays, todayInColombo } from "@/lib/colombo-time";

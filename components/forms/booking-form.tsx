@@ -2,7 +2,7 @@
 
 import Form from "next/form";
 import { useState } from "react";
-import SelectMenu from "@/components/select-menu";
+import SelectMenu from "@/components/ui/select-menu";
 import { TIME_SLOTS } from "@/lib/booking-settings";
 import { nowTimeInColombo } from "@/lib/colombo-time";
 

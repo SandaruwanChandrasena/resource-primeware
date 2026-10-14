@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { confirmBooking, type ConfirmBookingState } from "@/actions/bookings";
-import SubmitButton from "@/components/submit-button";
-import type { BookingFormValues } from "@/components/booking-form";
+import SubmitButton from "@/components/ui/submit-button";
+import type { BookingFormValues } from "@/components/forms/booking-form";
 
 type BookingConfirmProps = {
   resourceId: string;

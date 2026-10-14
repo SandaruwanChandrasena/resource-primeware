@@ -1,8 +1,11 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "@/components/app-icons";
-import SelectMenu from "@/components/select-menu";
-import Spinner from "@/components/spinner";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@/components/layout/app-icons";
+import SelectMenu from "@/components/ui/select-menu";
+import Spinner from "@/components/ui/spinner";
 import {
   DEFAULT_PAGE_SIZE,
   PAGE_SIZES,

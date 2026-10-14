@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
-import AppLogo from "@/components/app-logo";
-import { LogoutIcon } from "@/components/app-icons";
-import SubmitButton from "@/components/submit-button";
+import AppLogo from "@/components/layout/app-logo";
+import { LogoutIcon } from "@/components/layout/app-icons";
+import SubmitButton from "@/components/ui/submit-button";
 import { getInitials } from "@/lib/user-display";
 
 // Add one line here when a new member page is built (D48).

@@ -7,9 +7,9 @@ import {
   updateResource,
   type ResourceFormState,
 } from "@/actions/resources";
-import { resourceImageUrl } from "@/components/resource-photo";
-import SelectMenu, { toOptions } from "@/components/select-menu";
-import SubmitButton from "@/components/submit-button";
+import { resourceImageUrl } from "@/components/ui/resource-photo";
+import SelectMenu, { toOptions } from "@/components/ui/select-menu";
+import SubmitButton from "@/components/ui/submit-button";
 import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
 
 const inputClass =

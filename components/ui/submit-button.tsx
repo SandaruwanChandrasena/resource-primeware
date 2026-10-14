@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react";
 import { useFormStatus } from "react-dom";
-import PendingLabel from "@/components/pending-label";
+import PendingLabel from "@/components/ui/pending-label";
 
 type SubmitButtonProps = Omit<ComponentProps<"button">, "type"> & {
   pendingText?: string;

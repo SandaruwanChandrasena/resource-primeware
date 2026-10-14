@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
-import AppLogo from "@/components/app-logo";
+import AppLogo from "@/components/layout/app-logo";
 import {
   DashboardIcon,
   LogoutIcon,
   ResourcesIcon,
   UsersIcon,
-} from "@/components/app-icons";
-import SubmitButton from "@/components/submit-button";
+} from "@/components/layout/app-icons";
+import SubmitButton from "@/components/ui/submit-button";
 import { getInitials } from "@/lib/user-display";
 
 // Add one line here when a new admin page is built (D48).

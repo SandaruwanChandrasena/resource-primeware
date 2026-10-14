@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { createUser, updateUser, type UserFormState } from "@/actions/users";
-import SelectMenu, { toOptions } from "@/components/select-menu";
-import SubmitButton from "@/components/submit-button";
+import SelectMenu, { toOptions } from "@/components/ui/select-menu";
+import SubmitButton from "@/components/ui/submit-button";
 import { ROLE_LABELS } from "@/lib/user-display";
 
 const inputClass =

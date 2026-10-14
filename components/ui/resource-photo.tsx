@@ -3,7 +3,7 @@ import {
   ResourcesIcon,
   RoomIcon,
   VehicleIcon,
-} from "@/components/app-icons";
+} from "@/components/layout/app-icons";
 import type { ResourceType } from "@/generated/prisma/client";
 
 const TYPE_ICONS: Record<ResourceType, typeof RoomIcon> = {

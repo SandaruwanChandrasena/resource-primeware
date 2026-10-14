@@ -2,7 +2,7 @@
 
 import { useId, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import PendingLabel from "@/components/pending-label";
+import PendingLabel from "@/components/ui/pending-label";
 
 type ConfirmButtonProps = {
   action: () => Promise<void>;

@@ -1,9 +1,9 @@
 import Link from "next/link";
-import ResourcePhoto from "@/components/resource-photo";
-import SearchFilters from "@/components/search-filters";
-import SortSelect from "@/components/sort-select";
-import TablePagination from "@/components/table-pagination";
-import ViewToggle from "@/components/view-toggle";
+import ResourcePhoto from "@/components/ui/resource-photo";
+import SearchFilters from "@/components/list-tools/search-filters";
+import SortSelect from "@/components/list-tools/sort-select";
+import TablePagination from "@/components/list-tools/table-pagination";
+import ViewToggle from "@/components/list-tools/view-toggle";
 import type { Prisma } from "@/generated/prisma/client";
 import { requireMember } from "@/lib/auth-guard";
 import { db } from "@/lib/db";

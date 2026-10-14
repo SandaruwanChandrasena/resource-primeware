@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import BookingConfirm from "@/components/booking-confirm";
-import ResourcePhoto from "@/components/resource-photo";
+import BookingConfirm from "@/components/forms/booking-confirm";
+import ResourcePhoto from "@/components/ui/resource-photo";
 import { requireMember } from "@/lib/auth-guard";
 import {
   formatDuration,

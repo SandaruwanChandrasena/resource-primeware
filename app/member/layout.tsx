@@ -1,4 +1,4 @@
-import MemberNavbar from "@/components/member-navbar";
+import MemberNavbar from "@/components/layout/member-navbar";
 import { requireMember } from "@/lib/auth-guard";
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {

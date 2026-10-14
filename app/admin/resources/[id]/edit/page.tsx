@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import ResourceForm from "@/components/resource-form";
-import StatusPill from "@/components/status-pill";
+import ResourceForm from "@/components/forms/resource-form";
+import StatusPill from "@/components/ui/status-pill";
 import { requireAdmin } from "@/lib/auth-guard";
 import { db } from "@/lib/db";
 

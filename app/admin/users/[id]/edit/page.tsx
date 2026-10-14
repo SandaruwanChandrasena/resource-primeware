@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import StatusPill from "@/components/status-pill";
-import UserForm from "@/components/user-form";
+import StatusPill from "@/components/ui/status-pill";
+import UserForm from "@/components/forms/user-form";
 import { requireAdmin } from "@/lib/auth-guard";
 import { db } from "@/lib/db";
 
@@ -20,7 +20,15 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
   // Safe fields only: the password hash never leaves the server (D26).
   const user = await db.user.findUnique({
     where: { id },
-    select: { id: true, name: true, email: true, phone: true, department: true, role: true, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      department: true,
+      role: true,
+      isActive: true,
+    },
   });
   if (!user) notFound();
 
@@ -29,9 +37,13 @@ export default async function EditUserPage({ params }: EditUserPageProps) {
       <div>
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">Edit user</h1>
-          <StatusPill tone={user.isActive ? "green" : "gray"}>{user.isActive ? "Active" : "Inactive"}</StatusPill>
+          <StatusPill tone={user.isActive ? "green" : "gray"}>
+            {user.isActive ? "Active" : "Inactive"}
+          </StatusPill>
         </div>
-        <p className="mt-1 text-sm text-gray-500">Change the details of {user.name}.</p>
+        <p className="mt-1 text-sm text-gray-500">
+          Change the details of {user.name}.
+        </p>
       </div>
       <UserForm user={user} isSelf={user.id === admin.id} />
     </section>

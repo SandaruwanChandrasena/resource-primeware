@@ -1,4 +1,4 @@
-import ResourceForm from "@/components/resource-form";
+import ResourceForm from "@/components/forms/resource-form";
 import { requireAdmin } from "@/lib/auth-guard";
 
 export const metadata = { title: "Add resource | Resource Reservation" };
