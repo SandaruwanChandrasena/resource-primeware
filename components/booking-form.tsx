@@ -1,9 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { bookResource, type BookingFormState } from "@/actions/bookings";
+import Form from "next/form";
+import { useState } from "react";
 import SelectMenu from "@/components/select-menu";
-import SubmitButton from "@/components/submit-button";
 import { TIME_SLOTS } from "@/lib/booking-settings";
 import { nowTimeInColombo } from "@/lib/colombo-time";
 
@@ -11,38 +10,34 @@ const inputClass =
   "rounded-lg border border-gray-300 px-3 py-2 font-normal focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100";
 const labelClass = "flex flex-col gap-1.5 text-sm font-medium";
 
-type BookingFormProps = { resourceId: string; today: string; maxDate: string };
+export type BookingFormValues = {
+  date: string;
+  startTime: string;
+  endTime: string;
+  purpose: string;
+};
 
-function FieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <span className="text-xs font-normal text-red-600">{message}</span>;
-}
+type BookingFormProps = {
+  reviewPath: string;
+  today: string;
+  maxDate: string;
+  initial: BookingFormValues;
+};
 
 const toOptions = (times: string[]) =>
   times.map((t) => ({ value: t, label: t }));
 
-type BookingFieldsProps = BookingFormProps & {
-  state: BookingFormState;
-  formAction: (formData: FormData) => void;
-};
-
-function BookingFields({
-  resourceId,
+// Step 1 of booking: pick the time. "Review booking" opens the review page.
+// Shared later by the admin (D27).
+export default function BookingForm({
+  reviewPath,
   today,
   maxDate,
-  state,
-  formAction,
-}: BookingFieldsProps) {
-  const values = state?.values ?? {
-    date: today,
-    startTime: "",
-    endTime: "",
-    purpose: "",
-  };
-  const [date, setDate] = useState(values.date);
-  const [start, setStart] = useState(values.startTime);
-  const [end, setEnd] = useState(values.endTime);
-  const fieldError = (field: string) => state?.fieldErrors?.[field]?.[0];
+  initial,
+}: BookingFormProps) {
+  const [date, setDate] = useState(initial.date);
+  const [start, setStart] = useState(initial.startTime);
+  const [end, setEnd] = useState(initial.endTime);
 
   // Today: hide start times that have passed. The server checks too.
   const now = nowTimeInColombo();
@@ -66,18 +61,8 @@ function BookingFields({
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
-      <input type="hidden" name="resourceId" value={resourceId} />
-
-      {state?.error && (
-        <p
-          role="alert"
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
-        >
-          {state.error}
-        </p>
-      )}
-
+    // next/form: a normal GET form, but it moves to the next page without a full reload.
+    <Form action={reviewPath} className="flex flex-col gap-5">
       <div className="grid gap-5 sm:grid-cols-3">
         <label className={labelClass}>
           Date
@@ -91,7 +76,6 @@ function BookingFields({
             onChange={(e) => changeDate(e.target.value)}
             className={inputClass}
           />
-          <FieldError message={fieldError("date")} />
         </label>
 
         {/* Divs, not labels: a label would re-open the menu on click. */}
@@ -104,9 +88,7 @@ function BookingFields({
             options={toOptions(startTimes)}
             value={start}
             onChange={changeStart}
-            invalid={!!fieldError("startTime")}
           />
-          <FieldError message={fieldError("startTime")} />
         </div>
 
         <div className={labelClass}>
@@ -118,9 +100,7 @@ function BookingFields({
             options={toOptions(endTimes)}
             value={end}
             onChange={setEnd}
-            invalid={!!fieldError("endTime")}
           />
-          <FieldError message={fieldError("endTime")} />
         </div>
       </div>
 
@@ -133,48 +113,25 @@ function BookingFields({
           minLength={3}
           maxLength={200}
           placeholder="e.g. Weekly team meeting"
-          defaultValue={values.purpose}
+          defaultValue={initial.purpose}
           className={inputClass}
         />
-        <FieldError message={fieldError("purpose")} />
       </label>
 
-      <div className="flex justify-end border-t border-gray-100 pt-5">
-        <SubmitButton
-          pendingText="Booking..."
+      <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-5">
+        {(!start || !end) && (
+          <span className="text-xs text-gray-500">
+            Choose a start and end time.
+          </span>
+        )}
+        <button
+          type="submit"
+          disabled={!start || !end}
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         >
-          Book now
-        </SubmitButton>
+          Review booking
+        </button>
       </div>
-    </form>
-  );
-}
-
-// Booking form. Shared later by the admin (D27).
-export default function BookingForm(props: BookingFormProps) {
-  const [state, formAction] = useActionState<BookingFormState, FormData>(
-    bookResource,
-    undefined,
-  );
-
-  return (
-    <div className="flex flex-col gap-4">
-      {state?.success && (
-        <p
-          role="status"
-          className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700"
-        >
-          {state.success}
-        </p>
-      )}
-      {/* A new key after each booking gives a fresh, empty form. */}
-      <BookingFields
-        key={state?.submittedAt ?? 0}
-        state={state}
-        formAction={formAction}
-        {...props}
-      />
-    </div>
+    </Form>
   );
 }

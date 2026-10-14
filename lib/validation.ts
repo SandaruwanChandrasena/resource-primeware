@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ResourceType, Role } from "@/generated/prisma/client";
-import { TIME_SLOTS } from "@/lib/booking-settings";
+import { BOOKING_SORTS, TIME_SLOTS } from "@/lib/booking-settings";
 import {
   CARD_PAGE_SIZES,
   DEFAULT_CARD_PAGE_SIZE,
@@ -167,3 +167,11 @@ export const bookingSchema = z
     message: "End time must be after start time.",
     path: ["endTime"],
   });
+
+// URL filters for "My bookings". No tab = upcoming.
+export const myBookingsFilterSchema = z.object({
+  tab: z.enum(["past", "cancelled"]).optional().catch(undefined),
+  sort: z.enum(BOOKING_SORTS).optional().catch(undefined),
+  newId: z.uuid().optional().catch(undefined),
+  ...pageFields,
+});

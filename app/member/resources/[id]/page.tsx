@@ -11,11 +11,15 @@ import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
 
 export const metadata = { title: "Book | Resource Reservation" };
 
-// Next 16: params is a Promise.
-type BookResourcePageProps = { params: Promise<{ id: string }> };
+// Next 16: params and searchParams are Promises.
+type BookResourcePageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
 export default async function BookResourcePage({
   params,
+  searchParams,
 }: BookResourcePageProps) {
   await requireMember();
   const { id } = await params;
@@ -38,7 +42,17 @@ export default async function BookResourcePage({
   });
   if (!resource) notFound();
 
+  // "Change" on the review page comes back here with the values in the URL.
+  const query = await searchParams;
+  const text = (key: string) =>
+    typeof query[key] === "string" ? query[key] : "";
   const today = todayInColombo();
+  const initial = {
+    date: /^\d{4}-\d{2}-\d{2}$/.test(text("date")) ? text("date") : today,
+    startTime: text("startTime"),
+    endTime: text("endTime"),
+    purpose: text("purpose").slice(0, 200),
+  };
 
   return (
     <section className="flex max-w-3xl flex-col gap-6">
@@ -75,9 +89,10 @@ export default async function BookResourcePage({
               {CLOSE_TIME}, up to {MAX_DAYS_AHEAD} days ahead.
             </p>
             <BookingForm
-              resourceId={resource.id}
+              reviewPath={`/member/resources/${resource.id}/review`}
               today={today}
               maxDate={addDays(today, MAX_DAYS_AHEAD)}
+              initial={initial}
             />
           </>
         ) : (

@@ -1,58 +1,49 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth-guard";
-import { createBooking } from "@/lib/services/booking-rules";
+import { demoDelay } from "@/lib/demo-delay";
+import { cancelOwnBooking, createBooking } from "@/lib/services/booking-rules";
 import { bookingSchema } from "@/lib/validation";
 
-type BookingField = "date" | "startTime" | "endTime" | "purpose";
-
-export type BookingFormState =
-  | {
-      error?: string;
-      isClash?: boolean;
-      success?: string;
-      submittedAt?: number;
-      fieldErrors?: Partial<Record<string, string[]>>;
-      values?: Record<BookingField, string>;
-    }
+export type ConfirmBookingState =
+  | { error?: string; isClash?: boolean }
   | undefined;
 
-// Members and admins can both book (D27), so any logged-in user.
-export async function bookResource(
-  _prev: BookingFormState,
+// "Confirm booking" on the review page. Members and admins can book (D27).
+export async function confirmBooking(
+  _prev: ConfirmBookingState,
   formData: FormData,
-): Promise<BookingFormState> {
+): Promise<ConfirmBookingState> {
   const user = await requireUser();
-  const values = {
-    date: String(formData.get("date") ?? ""),
-    startTime: String(formData.get("startTime") ?? ""),
-    endTime: String(formData.get("endTime") ?? ""),
-    purpose: String(formData.get("purpose") ?? ""),
-  };
 
+  // The review page sends hidden fields, so check them all again.
   const parsed = bookingSchema.safeParse({
-    ...values,
     resourceId: formData.get("resourceId"),
+    date: formData.get("date"),
+    startTime: formData.get("startTime"),
+    endTime: formData.get("endTime"),
+    purpose: formData.get("purpose"),
   });
-  if (!parsed.success) {
-    const fieldErrors = z.flattenError(parsed.error).fieldErrors;
-    return {
-      error: fieldErrors.resourceId?.[0] ?? "Please fix the marked fields.",
-      fieldErrors,
-      values,
-    };
-  }
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
 
   // The owner is always the logged-in user, never a value from the form.
   const result = await createBooking({ ...parsed.data, userId: user.id });
-  if (!result.ok) {
-    return result.field
-      ? { fieldErrors: { [result.field]: [result.error] }, values }
-      : { error: result.error, isClash: result.isClash, values };
-  }
+  if (!result.ok) return { error: result.error, isClash: result.isClash };
 
   revalidatePath("/member", "layout");
-  return { success: result.message, submittedAt: Date.now() };
+  redirect(`/member/bookings?newId=${result.id}`);
+}
+
+// Cancel one of your own upcoming bookings.
+export async function cancelMyBooking(reservationId: string) {
+  const user = await requireUser();
+  const id = z.uuid().parse(reservationId);
+  await demoDelay();
+
+  // false = already cancelled, started, or not yours: the page just shows the real state.
+  await cancelOwnBooking(id, user.id);
+  revalidatePath("/member", "layout");
 }

@@ -12,11 +12,13 @@ type ConfirmButtonProps = {
   message: string;
   confirmLabel: string;
   pendingText: string;
+  cancelLabel?: string;
 };
 
 type DialogButtonsProps = {
   confirmLabel: string;
   pendingText: string;
+  cancelLabel: string;
   onCancel: () => void;
 };
 
@@ -24,6 +26,7 @@ type DialogButtonsProps = {
 function DialogButtons({
   confirmLabel,
   pendingText,
+  cancelLabel,
   onCancel,
 }: DialogButtonsProps) {
   const { pending } = useFormStatus();
@@ -36,7 +39,7 @@ function DialogButtons({
         disabled={pending}
         className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
       >
-        Cancel
+        {cancelLabel}
       </button>
       <button
         type="submit"
@@ -61,6 +64,7 @@ export default function ConfirmButton({
   message,
   confirmLabel,
   pendingText,
+  cancelLabel = "Cancel",
 }: ConfirmButtonProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -96,6 +100,7 @@ export default function ConfirmButton({
           <DialogButtons
             confirmLabel={confirmLabel}
             pendingText={pendingText}
+            cancelLabel={cancelLabel}
             onCancel={close}
           />
         </form>

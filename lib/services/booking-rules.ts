@@ -11,23 +11,20 @@ import { demoDelay } from "@/lib/demo-delay";
 
 // Shared booking rules for members and admins (D53).
 
-export type NewBooking = {
+export type BookingRequest = {
   resourceId: string;
-  userId: string;
   date: string;
   startTime: string;
   endTime: string;
   purpose: string;
 };
 
-export type BookingResult =
-  | { ok: true; message: string }
-  | {
-      ok: false;
-      error: string;
-      field?: "date" | "startTime" | "endTime";
-      isClash?: boolean;
-    };
+export type BookingProblem = {
+  ok: false;
+  error: string;
+  field?: "date" | "startTime" | "endTime";
+  isClash?: boolean;
+};
 
 // First confirmed booking that overlaps [start, end). Touching edges are fine.
 function findClash(resourceId: string, start: Date, end: Date) {
@@ -70,9 +67,14 @@ function isOverlapError(error: unknown) {
   return text.includes("reservations_no_overlap") || text.includes("23P01");
 }
 
-export async function createBooking(input: NewBooking): Promise<BookingResult> {
-  const start = toUtc(input.date, input.startTime);
-  const end = toUtc(input.date, input.endTime);
+// All rules except saving. Used by the review page and by createBooking.
+export async function checkBooking(
+  request: BookingRequest,
+): Promise<
+  { ok: true; start: Date; end: Date; resourceName: string } | BookingProblem
+> {
+  const start = toUtc(request.date, request.startTime);
+  const end = toUtc(request.date, request.endTime);
 
   // D20: end after start, nothing in the past, not too far ahead.
   if (end <= start)
@@ -88,7 +90,7 @@ export async function createBooking(input: NewBooking): Promise<BookingResult> {
       error: "This time has already passed. Choose a later time.",
     };
   }
-  if (input.date > addDays(todayInColombo(), MAX_DAYS_AHEAD)) {
+  if (request.date > addDays(todayInColombo(), MAX_DAYS_AHEAD)) {
     return {
       ok: false,
       field: "date",
@@ -97,7 +99,7 @@ export async function createBooking(input: NewBooking): Promise<BookingResult> {
   }
 
   const resource = await db.resource.findUnique({
-    where: { id: input.resourceId },
+    where: { id: request.resourceId },
     select: { name: true, isActive: true },
   });
   if (!resource) return { ok: false, error: "This resource no longer exists." };
@@ -108,8 +110,8 @@ export async function createBooking(input: NewBooking): Promise<BookingResult> {
       error: "This resource is not available for booking right now.",
     };
 
-  // Code check first, so the message can say what clashes (D2).
-  const clash = await findClash(input.resourceId, start, end);
+  // Code check, so the message can say what clashes (D2).
+  const clash = await findClash(request.resourceId, start, end);
   if (clash)
     return {
       ok: false,
@@ -117,34 +119,62 @@ export async function createBooking(input: NewBooking): Promise<BookingResult> {
       error: clashMessage(resource.name, clash),
     };
 
+  return { ok: true, start, end, resourceName: resource.name };
+}
+
+export async function createBooking(
+  request: BookingRequest & { userId: string },
+): Promise<{ ok: true; id: string } | BookingProblem> {
+  const check = await checkBooking(request);
+  if (!check.ok) return check;
+
   // Demo only: makes the gap wide, to show two people booking at once.
   await demoDelay();
 
   try {
-    await db.reservation.create({
+    const booking = await db.reservation.create({
       data: {
-        resourceId: input.resourceId,
-        userId: input.userId,
-        startTime: start,
-        endTime: end,
-        purpose: input.purpose,
+        resourceId: request.resourceId,
+        userId: request.userId,
+        startTime: check.start,
+        endTime: check.end,
+        purpose: request.purpose,
       },
+      select: { id: true },
     });
+    return { ok: true, id: booking.id };
   } catch (error) {
     // Someone booked the same time a moment ago; the database blocked it (D1).
     if (!isOverlapError(error)) throw error;
-    const winner = await findClash(input.resourceId, start, end);
+    const winner = await findClash(request.resourceId, check.start, check.end);
     return {
       ok: false,
       isClash: true,
       error: winner
-        ? clashMessage(resource.name, winner)
+        ? clashMessage(check.resourceName, winner)
         : "Someone just booked this time. Please choose another time.",
     };
   }
+}
 
-  return {
-    ok: true,
-    message: `Booked ${resource.name} on ${formatDate(start)}, ${formatTime(start)}–${formatTime(end)}.`,
-  };
+// Cancel = change the status, never delete (D7). Who and when are saved (D28).
+// One transaction, so Stage 5 can notify waiting people in the same step (D6).
+export async function cancelOwnBooking(reservationId: string, userId: string) {
+  return db.$transaction(async (tx) => {
+    const result = await tx.reservation.updateMany({
+      // Only your own, still confirmed, and not started yet.
+      where: {
+        id: reservationId,
+        userId,
+        status: "CONFIRMED",
+        startTime: { gt: new Date() },
+      },
+      data: {
+        status: "CANCELLED",
+        cancelledAt: new Date(),
+        cancelledById: userId,
+      },
+    });
+    return result.count === 1;
+  });
 }

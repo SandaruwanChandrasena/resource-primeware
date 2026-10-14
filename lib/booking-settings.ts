@@ -17,3 +17,12 @@ for (
   m += SLOT_MINUTES
 )
   TIME_SLOTS.push(toTime(m));
+
+// Sort choices for "My bookings".
+export const BOOKING_SORTS = ["soonest", "latest"] as const;
+export type BookingSort = (typeof BOOKING_SORTS)[number];
+
+export const BOOKING_SORT_LABELS: Record<BookingSort, string> = {
+  soonest: "Soonest first",
+  latest: "Latest first",
+};

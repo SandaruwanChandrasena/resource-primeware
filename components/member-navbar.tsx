@@ -12,6 +12,7 @@ import { getInitials } from "@/lib/user-display";
 const NAV_ITEMS = [
   { href: "/member", label: "Home" },
   { href: "/member/resources", label: "Resources" },
+  { href: "/member/bookings", label: "My bookings" },
 ];
 
 // "/member" must match exactly; other links also match their sub-pages.

@@ -21,6 +21,13 @@ const dayLabel = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",
 });
+const longDay = new Intl.DateTimeFormat("en-GB", {
+  timeZone: TIME_ZONE,
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
 
 // "2026-10-15" + "10:00" in Sri Lanka -> the exact moment.
 export function toUtc(date: string, time: string) {
@@ -52,4 +59,18 @@ export function formatTime(date: Date) {
 // e.g. "Thu 15 Oct"
 export function formatDate(date: Date) {
   return dayLabel.format(date);
+}
+
+// e.g. "Thursday 15 October 2026"
+export function formatLongDate(date: Date) {
+  return longDay.format(date);
+}
+
+// e.g. 90 -> "1 hour 30 min"
+export function formatDuration(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  const hourText = hours ? `${hours} hour${hours > 1 ? "s" : ""}` : "";
+  const minText = rest ? `${rest} min` : "";
+  return [hourText, minText].filter(Boolean).join(" ");
 }
