@@ -7,11 +7,13 @@ export default async function AdminDashboardPage() {
   const user = await requireAdmin();
 
   return (
-    <section>
-      <h1 className="text-2xl font-bold">Admin dashboard</h1>
-      <p className="mt-1 text-gray-600">Welcome, {user.name}.</p>
+    <section className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Admin dashboard</h1>
+        <p className="mt-1 text-sm text-gray-500">Welcome back, {user.name}.</p>
+      </div>
 
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-sm">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-500">
         Usage numbers and the bookings for today will show here.
       </div>
     </section>

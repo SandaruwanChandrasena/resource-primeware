@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Brand colors: change these 4 lines to re-theme the whole app (D47). */
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+}
+
 /* Use the Geist font from layout.tsx for all text. */
 @theme inline {
   --font-sans: var(--font-geist-sans);
