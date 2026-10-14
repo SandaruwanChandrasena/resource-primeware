@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/auth-guard";
+import { getCurrentUser } from "@/lib/security/auth-guard";
 import AppLogo from "@/components/layout/app-logo";
 import LoginForm from "@/components/forms/login-form";
 

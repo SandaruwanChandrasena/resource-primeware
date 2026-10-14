@@ -6,7 +6,7 @@ import { logout } from "@/actions/auth";
 import AppLogo from "@/components/layout/app-logo";
 import { LogoutIcon } from "@/components/layout/app-icons";
 import SubmitButton from "@/components/ui/submit-button";
-import { getInitials } from "@/lib/user-display";
+import { getInitials } from "@/lib/config/user-display";
 
 // Add one line here when a new member page is built (D48).
 const NAV_ITEMS = [

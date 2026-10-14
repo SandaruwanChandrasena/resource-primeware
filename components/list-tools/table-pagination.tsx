@@ -10,8 +10,8 @@ import {
   DEFAULT_PAGE_SIZE,
   PAGE_SIZES,
   getPageNumbers,
-} from "@/lib/pagination";
-import { useUrlQuery } from "@/lib/url-query";
+} from "@/lib/config/pagination";
+import { useUrlQuery } from "@/lib/utils/url-query";
 
 type TablePaginationProps = {
   page: number;

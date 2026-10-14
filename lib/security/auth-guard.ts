@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { readSession } from "@/lib/session";
+import { readSession } from "@/lib/security/session";
 
 // One DB lookup per request, even if many places call it.
 export const getCurrentUser = cache(async () => {
@@ -10,7 +10,14 @@ export const getCurrentUser = cache(async () => {
 
   const user = await db.user.findUnique({
     where: { id: session.userId },
-    select: { id: true, name: true, email: true, role: true, department: true, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      department: true,
+      isActive: true,
+    },
   });
 
   if (!user || !user.isActive) return null;

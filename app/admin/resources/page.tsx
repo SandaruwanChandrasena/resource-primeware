@@ -10,13 +10,13 @@ import StatusPill from "@/components/ui/status-pill";
 import SubmitButton from "@/components/ui/submit-button";
 import TablePagination from "@/components/list-tools/table-pagination";
 import type { Prisma } from "@/generated/prisma/client";
-import { requireAdmin } from "@/lib/auth-guard";
+import { requireAdmin } from "@/lib/security/auth-guard";
 import { db } from "@/lib/db";
 import {
   RESOURCE_ORDER_BY,
   RESOURCE_SORT_LABELS,
   RESOURCE_TYPE_LABELS,
-} from "@/lib/resource-types";
+} from "@/lib/config/resource-types";
 import { resourceFilterSchema } from "@/lib/validation";
 
 export const metadata = { title: "Resources | Resource Reservation" };

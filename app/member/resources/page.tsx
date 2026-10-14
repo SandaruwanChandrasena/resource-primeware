@@ -5,14 +5,17 @@ import SortSelect from "@/components/list-tools/sort-select";
 import TablePagination from "@/components/list-tools/table-pagination";
 import ViewToggle from "@/components/list-tools/view-toggle";
 import type { Prisma } from "@/generated/prisma/client";
-import { requireMember } from "@/lib/auth-guard";
+import { requireMember } from "@/lib/security/auth-guard";
 import { db } from "@/lib/db";
-import { CARD_PAGE_SIZES, DEFAULT_CARD_PAGE_SIZE } from "@/lib/pagination";
+import {
+  CARD_PAGE_SIZES,
+  DEFAULT_CARD_PAGE_SIZE,
+} from "@/lib/config/pagination";
 import {
   RESOURCE_ORDER_BY,
   RESOURCE_SORT_LABELS,
   RESOURCE_TYPE_LABELS,
-} from "@/lib/resource-types";
+} from "@/lib/config/resource-types";
 import { memberResourceFilterSchema } from "@/lib/validation";
 
 export const metadata = { title: "Resources | Resource Reservation" };

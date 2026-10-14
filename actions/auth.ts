@@ -3,8 +3,8 @@
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { demoDelay } from "@/lib/demo-delay";
-import { createSession, deleteSession } from "@/lib/session";
+import { demoDelay } from "@/lib/utils/demo-delay";
+import { createSession, deleteSession } from "@/lib/security/session";
 import { loginSchema } from "@/lib/validation";
 
 export type LoginState = { error?: string; email?: string } | undefined;

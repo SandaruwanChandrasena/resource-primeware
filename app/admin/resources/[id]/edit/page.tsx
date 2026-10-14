@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import ResourceForm from "@/components/forms/resource-form";
 import StatusPill from "@/components/ui/status-pill";
-import { requireAdmin } from "@/lib/auth-guard";
+import { requireAdmin } from "@/lib/security/auth-guard";
 import { db } from "@/lib/db";
 
 export const metadata = { title: "Edit resource | Resource Reservation" };

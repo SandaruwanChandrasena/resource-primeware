@@ -1,6 +1,6 @@
 "use client";
 
-import { useUrlQuery } from "@/lib/url-query";
+import { useUrlQuery } from "@/lib/utils/url-query";
 
 type FilterTab = { value: string; label: string; count: number };
 type FilterTabsProps = { param: string; tabs: FilterTab[]; current: string };

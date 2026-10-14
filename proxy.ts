@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { decryptToken, SESSION_COOKIE } from "@/lib/session";
+import { decryptToken, SESSION_COOKIE } from "@/lib/security/session";
 
 // True for "/admin" and "/admin/...", but not "/administrator".
 function inArea(pathname: string, area: string) {
@@ -12,7 +12,9 @@ export async function proxy(request: NextRequest) {
   // The login page is open to everyone.
   if (pathname === "/login") return NextResponse.next();
 
-  const session = await decryptToken(request.cookies.get(SESSION_COOKIE)?.value);
+  const session = await decryptToken(
+    request.cookies.get(SESSION_COOKIE)?.value,
+  );
 
   if (!session) {
     // API callers (bell, Postman) get JSON, not an HTML page.
@@ -37,5 +39,7 @@ export async function proxy(request: NextRequest) {
 
 // Skip Next.js files and images, so they load fast.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+  ],
 };

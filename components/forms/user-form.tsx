@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { createUser, updateUser, type UserFormState } from "@/actions/users";
 import SelectMenu, { toOptions } from "@/components/ui/select-menu";
 import SubmitButton from "@/components/ui/submit-button";
-import { ROLE_LABELS } from "@/lib/user-display";
+import { ROLE_LABELS } from "@/lib/config/user-display";
 
 const inputClass =
   "rounded-lg border border-gray-300 px-3 py-2 font-normal focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100 disabled:bg-gray-100 disabled:text-gray-500";

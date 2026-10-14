@@ -5,9 +5,12 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth-guard";
-import { demoDelay } from "@/lib/demo-delay";
-import { deleteResourceImage, saveResourceImage } from "@/lib/resource-images";
+import { requireAdmin } from "@/lib/security/auth-guard";
+import { demoDelay } from "@/lib/utils/demo-delay";
+import {
+  deleteResourceImage,
+  saveResourceImage,
+} from "@/lib/services/resource-images";
 import { resourceSchema, type ResourceInput } from "@/lib/validation";
 
 export type ResourceFormState =

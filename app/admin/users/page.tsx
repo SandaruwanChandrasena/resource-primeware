@@ -9,14 +9,14 @@ import StatusPill from "@/components/ui/status-pill";
 import SubmitButton from "@/components/ui/submit-button";
 import TablePagination from "@/components/list-tools/table-pagination";
 import type { Prisma } from "@/generated/prisma/client";
-import { requireAdmin } from "@/lib/auth-guard";
+import { requireAdmin } from "@/lib/security/auth-guard";
 import { db } from "@/lib/db";
 import {
   ROLE_LABELS,
   USER_SORT_LABELS,
   getInitials,
   type UserSort,
-} from "@/lib/user-display";
+} from "@/lib/config/user-display";
 import { userFilterSchema } from "@/lib/validation";
 
 export const metadata = { title: "Users | Resource Reservation" };

@@ -1,14 +1,14 @@
 import { z } from "zod";
 import { ResourceType, Role } from "@/generated/prisma/client";
-import { BOOKING_SORTS, TIME_SLOTS } from "@/lib/booking-settings";
+import { BOOKING_SORTS, TIME_SLOTS } from "@/lib/config/booking-settings";
 import {
   CARD_PAGE_SIZES,
   DEFAULT_CARD_PAGE_SIZE,
   DEFAULT_PAGE_SIZE,
   PAGE_SIZES,
-} from "@/lib/pagination";
-import { RESOURCE_SORTS } from "@/lib/resource-types";
-import { USER_SORTS } from "@/lib/user-display";
+} from "@/lib/config/pagination";
+import { RESOURCE_SORTS } from "@/lib/config/resource-types";
+import { USER_SORTS } from "@/lib/config/user-display";
 
 // Clean the email first, then check that it looks like an email.
 export const loginSchema = z.object({

@@ -3,11 +3,15 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import BookingForm from "@/components/forms/booking-form";
 import ResourcePhoto from "@/components/ui/resource-photo";
-import { requireMember } from "@/lib/auth-guard";
-import { CLOSE_TIME, MAX_DAYS_AHEAD, OPEN_TIME } from "@/lib/booking-settings";
-import { addDays, todayInColombo } from "@/lib/colombo-time";
+import { requireMember } from "@/lib/security/auth-guard";
+import {
+  CLOSE_TIME,
+  MAX_DAYS_AHEAD,
+  OPEN_TIME,
+} from "@/lib/config/booking-settings";
+import { addDays, todayInColombo } from "@/lib/utils/colombo-time";
 import { db } from "@/lib/db";
-import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
+import { RESOURCE_TYPE_LABELS } from "@/lib/config/resource-types";
 
 export const metadata = { title: "Book | Resource Reservation" };
 

@@ -1,5 +1,5 @@
 import UserForm from "@/components/forms/user-form";
-import { requireAdmin } from "@/lib/auth-guard";
+import { requireAdmin } from "@/lib/security/auth-guard";
 
 export const metadata = { title: "Add user | Resource Reservation" };
 

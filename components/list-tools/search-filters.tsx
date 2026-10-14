@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { SearchIcon } from "@/components/layout/app-icons";
 import PendingLabel from "@/components/ui/pending-label";
 import SelectMenu, { toOptions } from "@/components/ui/select-menu";
-import { useUrlQuery } from "@/lib/url-query";
+import { useUrlQuery } from "@/lib/utils/url-query";
 
 type SearchFiltersProps = {
   q: string;

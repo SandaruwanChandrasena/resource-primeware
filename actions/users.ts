@@ -6,9 +6,13 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/auth-guard";
-import { demoDelay } from "@/lib/demo-delay";
-import { userCreateSchema, userUpdateSchema, type UserInput } from "@/lib/validation";
+import { requireAdmin } from "@/lib/security/auth-guard";
+import { demoDelay } from "@/lib/utils/demo-delay";
+import {
+  userCreateSchema,
+  userUpdateSchema,
+  type UserInput,
+} from "@/lib/validation";
 
 type UserField = keyof UserInput;
 
@@ -44,13 +48,20 @@ function friendlyDbError(error: unknown): string {
   throw error;
 }
 
-export async function createUser(_prev: UserFormState, formData: FormData): Promise<UserFormState> {
+export async function createUser(
+  _prev: UserFormState,
+  formData: FormData,
+): Promise<UserFormState> {
   await requireAdmin();
   await demoDelay();
   const { values, password } = readForm(formData);
   const parsed = userCreateSchema.safeParse({ ...values, password });
   if (!parsed.success) {
-    return { error: "Please fix the marked fields.", fieldErrors: z.flattenError(parsed.error).fieldErrors, values };
+    return {
+      error: "Please fix the marked fields.",
+      fieldErrors: z.flattenError(parsed.error).fieldErrors,
+      values,
+    };
   }
 
   // Only the hash is saved, never the password (D26).
@@ -65,14 +76,22 @@ export async function createUser(_prev: UserFormState, formData: FormData): Prom
   redirect("/admin/users");
 }
 
-export async function updateUser(userId: string, _prev: UserFormState, formData: FormData): Promise<UserFormState> {
+export async function updateUser(
+  userId: string,
+  _prev: UserFormState,
+  formData: FormData,
+): Promise<UserFormState> {
   const admin = await requireAdmin();
   const id = z.uuid().parse(userId);
   await demoDelay();
   const { values, password } = readForm(formData);
   const parsed = userUpdateSchema.safeParse({ ...values, password });
   if (!parsed.success) {
-    return { error: "Please fix the marked fields.", fieldErrors: z.flattenError(parsed.error).fieldErrors, values };
+    return {
+      error: "Please fix the marked fields.",
+      fieldErrors: z.flattenError(parsed.error).fieldErrors,
+      values,
+    };
   }
 
   // D49: an admin can't remove their own admin role.
@@ -82,7 +101,9 @@ export async function updateUser(userId: string, _prev: UserFormState, formData:
 
   // Empty password = keep the old one; else save the new hash.
   const { password: newPassword, ...data } = parsed.data;
-  const passwordData = newPassword ? { password: await bcrypt.hash(newPassword, 10) } : {};
+  const passwordData = newPassword
+    ? { password: await bcrypt.hash(newPassword, 10) }
+    : {};
   try {
     await db.user.update({ where: { id }, data: { ...data, ...passwordData } });
   } catch (error) {
@@ -98,7 +119,8 @@ export async function setUserActive(userId: string, isActive: boolean) {
   const { id, isActive: active } = toggleSchema.parse({ id: userId, isActive });
 
   // D49: the button is hidden, but the server checks too.
-  if (id === admin.id && !active) throw new Error("You can't deactivate your own account.");
+  if (id === admin.id && !active)
+    throw new Error("You can't deactivate your own account.");
 
   await demoDelay();
   await db.user.updateMany({ where: { id }, data: { isActive: active } });

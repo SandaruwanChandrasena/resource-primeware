@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireUser } from "@/lib/auth-guard";
-import { demoDelay } from "@/lib/demo-delay";
+import { requireUser } from "@/lib/security/auth-guard";
+import { demoDelay } from "@/lib/utils/demo-delay";
 import { cancelOwnBooking, createBooking } from "@/lib/services/booking-rules";
 import { bookingSchema } from "@/lib/validation";
 

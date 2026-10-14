@@ -8,9 +8,9 @@ import SortSelect from "@/components/list-tools/sort-select";
 import StatusPill from "@/components/ui/status-pill";
 import TablePagination from "@/components/list-tools/table-pagination";
 import type { Prisma } from "@/generated/prisma/client";
-import { requireMember } from "@/lib/auth-guard";
-import { BOOKING_SORT_LABELS } from "@/lib/booking-settings";
-import { formatDate, formatTime } from "@/lib/colombo-time";
+import { requireMember } from "@/lib/security/auth-guard";
+import { BOOKING_SORT_LABELS } from "@/lib/config/booking-settings";
+import { formatDate, formatTime } from "@/lib/utils/colombo-time";
 import { db } from "@/lib/db";
 import { myBookingsFilterSchema } from "@/lib/validation";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useUrlQuery } from "@/lib/url-query";
+import { useUrlQuery } from "@/lib/utils/url-query";
 
 type View = "grid" | "list";
 

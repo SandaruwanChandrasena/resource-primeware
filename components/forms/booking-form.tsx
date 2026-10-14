@@ -3,8 +3,8 @@
 import Form from "next/form";
 import { useState } from "react";
 import SelectMenu from "@/components/ui/select-menu";
-import { TIME_SLOTS } from "@/lib/booking-settings";
-import { nowTimeInColombo } from "@/lib/colombo-time";
+import { TIME_SLOTS } from "@/lib/config/booking-settings";
+import { nowTimeInColombo } from "@/lib/utils/colombo-time";
 
 const inputClass =
   "rounded-lg border border-gray-300 px-3 py-2 font-normal focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100";

@@ -1,13 +1,13 @@
-import { MAX_DAYS_AHEAD } from "@/lib/booking-settings";
+import { MAX_DAYS_AHEAD } from "@/lib/config/booking-settings";
 import {
   addDays,
   formatDate,
   formatTime,
   toUtc,
   todayInColombo,
-} from "@/lib/colombo-time";
+} from "@/lib/utils/colombo-time";
 import { db } from "@/lib/db";
-import { demoDelay } from "@/lib/demo-delay";
+import { demoDelay } from "@/lib/utils/demo-delay";
 
 // Shared booking rules for members and admins (D53).
 

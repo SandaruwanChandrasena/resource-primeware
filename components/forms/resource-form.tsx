@@ -10,7 +10,7 @@ import {
 import { resourceImageUrl } from "@/components/ui/resource-photo";
 import SelectMenu, { toOptions } from "@/components/ui/select-menu";
 import SubmitButton from "@/components/ui/submit-button";
-import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
+import { RESOURCE_TYPE_LABELS } from "@/lib/config/resource-types";
 
 const inputClass =
   "rounded-lg border border-gray-300 px-3 py-2 font-normal focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100";

@@ -1,5 +1,5 @@
-import { getCurrentUser } from "@/lib/auth-guard";
-import { readResourceImage } from "@/lib/resource-images";
+import { getCurrentUser } from "@/lib/security/auth-guard";
+import { readResourceImage } from "@/lib/services/resource-images";
 
 // Sends one resource photo. Logged-in users only (the proxy checks too).
 export async function GET(

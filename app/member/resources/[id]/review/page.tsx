@@ -3,15 +3,15 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import BookingConfirm from "@/components/forms/booking-confirm";
 import ResourcePhoto from "@/components/ui/resource-photo";
-import { requireMember } from "@/lib/auth-guard";
+import { requireMember } from "@/lib/security/auth-guard";
 import {
   formatDuration,
   formatLongDate,
   formatTime,
   toUtc,
-} from "@/lib/colombo-time";
+} from "@/lib/utils/colombo-time";
 import { db } from "@/lib/db";
-import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
+import { RESOURCE_TYPE_LABELS } from "@/lib/config/resource-types";
 import { checkBooking } from "@/lib/services/booking-rules";
 import { bookingSchema } from "@/lib/validation";
 
