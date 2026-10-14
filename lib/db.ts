@@ -5,7 +5,12 @@ import { PrismaClient } from "@/generated/prisma/client";
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient() {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+  // UTC session (D80): the pg adapter sends and reads times as UTC wall-clock
+  // text, so the DB session must be UTC too, or times shift by +05:30.
+  const adapter = new PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+    options: "-c timezone=UTC",
+  });
   return new PrismaClient({ adapter });
 }
 
