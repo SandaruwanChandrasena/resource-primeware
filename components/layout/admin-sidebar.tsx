@@ -44,7 +44,7 @@ export default function AdminSidebar({ name }: { name: string }) {
           <form action={logout}>
             <SubmitButton
               aria-label="Log out"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-900 text-white transition-colors hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:opacity-60"
             >
               <LogoutIcon />
             </SubmitButton>
@@ -87,16 +87,16 @@ export default function AdminSidebar({ name }: { name: string }) {
           href="/admin/profile"
           aria-current={pathname === "/admin/profile" ? "page" : undefined}
           title="My profile"
-          className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 -m-1 hover:bg-gray-100"
+          className="group -m-1 flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg p-1 transition-colors hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
         >
           <span
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 ring-2 ring-brand-600/40 ring-offset-2 transition-all duration-500 group-hover:ring-brand-600/70 ${AVATAR_GLOW}`}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 ring-2 ring-brand-600/40 ring-offset-2 transition-all duration-300 group-hover:scale-105 group-hover:ring-brand-600/70 group-active:scale-95 motion-reduce:transition-none ${AVATAR_GLOW}`}
           >
             {getInitials(name)}
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{name}</span>
-            <span className="block text-xs text-gray-500">
+            <span className="block text-xs text-gray-500 group-hover:text-brand-700">
               Administrator · My profile
             </span>
           </span>
@@ -105,7 +105,7 @@ export default function AdminSidebar({ name }: { name: string }) {
           <SubmitButton
             aria-label="Log out"
             title="Log out"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-900"
+            className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-900 text-white transition-colors hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:opacity-60"
           >
             <LogoutIcon />
           </SubmitButton>

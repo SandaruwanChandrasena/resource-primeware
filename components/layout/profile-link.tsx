@@ -8,6 +8,7 @@ export const AVATAR_GLOW =
   "shadow-[0_0_10px_color-mix(in_oklab,var(--color-brand-600)_35%,transparent)] hover:shadow-[0_0_16px_color-mix(in_oklab,var(--color-brand-600)_55%,transparent)]";
 
 // Round avatar with a glow. On hover it widens and shows the first name (D76).
+// Hover: light blue + small grow; click: small press, so it feels clickable.
 export default function ProfileLink({
   name,
   href,
@@ -21,9 +22,9 @@ export default function ProfileLink({
       aria-label="My profile"
       aria-current={active ? "page" : undefined}
       title="My profile"
-      className={`group flex shrink-0 items-center rounded-full bg-white p-0.5 ring-2 ring-brand-600/40 transition-all duration-500 ease-out hover:ring-brand-600/70 focus:outline-none focus-visible:ring-brand-600 motion-reduce:transition-none ${AVATAR_GLOW}`}
+      className={`group flex shrink-0 cursor-pointer items-center rounded-full bg-white p-0.5 ring-2 ring-brand-600/40 transition-all duration-500 ease-out hover:bg-brand-50 hover:ring-brand-600/70 active:scale-95 focus:outline-none focus-visible:ring-brand-600 motion-reduce:transition-none ${AVATAR_GLOW}`}
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none">
         {getInitials(name)}
       </span>
       {/* Width 0 -> full: the avatar slides left as the name appears. */}
