@@ -28,6 +28,7 @@ export default async function EditResourcePage({
       location: true,
       capacity: true,
       description: true,
+      imageName: true,
       isActive: true,
     },
   });

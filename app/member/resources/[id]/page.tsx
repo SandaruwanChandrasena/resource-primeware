@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import BookingForm from "@/components/booking-form";
+import ResourcePhoto from "@/components/resource-photo";
 import { requireMember } from "@/lib/auth-guard";
 import { CLOSE_TIME, MAX_DAYS_AHEAD, OPEN_TIME } from "@/lib/booking-settings";
 import { addDays, todayInColombo } from "@/lib/colombo-time";
@@ -31,6 +32,7 @@ export default async function BookResourcePage({
       location: true,
       capacity: true,
       description: true,
+      imageName: true,
       isActive: true,
     },
   });
@@ -58,6 +60,12 @@ export default async function BookResourcePage({
           <p className="mt-2 text-sm text-gray-600">{resource.description}</p>
         )}
       </div>
+
+      <ResourcePhoto
+        imageName={resource.imageName}
+        type={resource.type}
+        variant="hero"
+      />
 
       <div className="rounded-xl border border-gray-200 bg-white p-6">
         {resource.isActive ? (

@@ -7,6 +7,7 @@ import {
   updateResource,
   type ResourceFormState,
 } from "@/actions/resources";
+import { resourceImageUrl } from "@/components/resource-photo";
 import SelectMenu, { toOptions } from "@/components/select-menu";
 import SubmitButton from "@/components/submit-button";
 import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
@@ -23,12 +24,72 @@ type ResourceFormProps = {
     location: string;
     capacity: number | null;
     description: string | null;
+    imageName: string | null;
   };
 };
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <span className="text-xs font-normal text-red-600">{message}</span>;
+}
+
+type PhotoFieldProps = { currentImage: string | null; error?: string };
+
+// Photo picker with a preview. It gets a new key after each try,
+// because the browser clears a file input when the form is sent.
+function PhotoField({ currentImage, error }: PhotoFieldProps) {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [remove, setRemove] = useState(false);
+  const shown =
+    preview ??
+    (currentImage && !remove ? resourceImageUrl(currentImage) : null);
+
+  function pick(file: File | undefined) {
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(file ? URL.createObjectURL(file) : null);
+  }
+
+  return (
+    <div className={labelClass}>
+      <span>
+        Photo <span className="font-normal text-gray-500">(optional)</span>
+      </span>
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex h-24 w-40 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+          {shown ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={shown} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <span className="text-xs font-normal text-gray-400">No photo</span>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          <input
+            name="image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => pick(e.target.files?.[0])}
+            className="text-sm font-normal text-gray-600 file:mr-3 file:rounded-lg file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-50"
+          />
+          <span className="text-xs font-normal text-gray-500">
+            JPG, PNG or WebP, max 2 MB.
+          </span>
+          {currentImage && !preview && (
+            <label className="flex items-center gap-2 text-xs font-normal text-gray-700">
+              <input
+                name="removeImage"
+                type="checkbox"
+                checked={remove}
+                onChange={(e) => setRemove(e.target.checked)}
+              />
+              Remove current photo
+            </label>
+          )}
+        </div>
+      </div>
+      <FieldError message={error} />
+    </div>
+  );
 }
 
 // One form for Add and Edit (D51). Edit = form filled with the resource.
@@ -144,6 +205,12 @@ export default function ResourceForm({ resource }: ResourceFormProps) {
         />
         <FieldError message={fieldError("description")} />
       </label>
+
+      <PhotoField
+        key={state?.attempt ?? 0}
+        currentImage={resource?.imageName ?? null}
+        error={state?.fieldErrors?.image?.[0]}
+      />
 
       <div className="flex justify-end gap-3 border-t border-gray-100 pt-5">
         <Link

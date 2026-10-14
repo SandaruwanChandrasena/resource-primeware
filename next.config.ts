@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  experimental: {
+    // Photos can be up to 2 MB; the form adds a little extra (default is 1 MB).
+    serverActions: { bodySizeLimit: "3mb" },
+  },
 };
 
 export default nextConfig;

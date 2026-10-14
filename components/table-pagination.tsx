@@ -10,21 +10,29 @@ import {
 } from "@/lib/pagination";
 import { useUrlQuery } from "@/lib/url-query";
 
-type TablePaginationProps = { page: number; pageSize: number; total: number };
+type TablePaginationProps = {
+  page: number;
+  pageSize: number;
+  total: number;
+  sizes?: readonly number[];
+  defaultSize?: number;
+};
 
 const pageButton =
   "flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-medium tabular-nums";
-const sizeOptions = PAGE_SIZES.map((size) => ({
-  value: String(size),
-  label: String(size),
-}));
 
 // Reusable: rows per page + page buttons. Page and size live in the URL.
 export default function TablePagination({
   page,
   pageSize,
   total,
+  sizes = PAGE_SIZES,
+  defaultSize = DEFAULT_PAGE_SIZE,
 }: TablePaginationProps) {
+  const sizeOptions = sizes.map((size) => ({
+    value: String(size),
+    label: String(size),
+  }));
   const { update, pending } = useUrlQuery();
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const goTo = (p: number) => update({ page: p === 1 ? undefined : String(p) });
@@ -37,16 +45,16 @@ export default function TablePagination({
       </span>
 
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <span aria-hidden="true">Rows per page</span>
+        <span aria-hidden="true">Per page</span>
         <SelectMenu
-          label="Rows per page"
+          label="Per page"
           size="sm"
           options={sizeOptions}
           value={String(pageSize)}
           // New size starts again at page 1.
           onChange={(v) =>
             update({
-              size: Number(v) === DEFAULT_PAGE_SIZE ? undefined : v,
+              size: Number(v) === defaultSize ? undefined : v,
               page: undefined,
             })
           }

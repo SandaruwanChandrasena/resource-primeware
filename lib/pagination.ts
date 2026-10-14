@@ -1,6 +1,10 @@
-// Rows-per-page choices for every table. 10 is the default.
+// Rows-per-page choices for tables. 10 is the default.
 export const PAGE_SIZES = [10, 25, 50] as const;
 export const DEFAULT_PAGE_SIZE = 10;
+
+// Card grids use 12, 24, 48: they fill rows of 2, 3 or 4 cards.
+export const CARD_PAGE_SIZES = [12, 24, 48] as const;
+export const DEFAULT_CARD_PAGE_SIZE = 12;
 
 // Page buttons to show, e.g. 1 … 4 5 6 … 12. "gap" = the dots.
 export function getPageNumbers(

@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { ResourceType, Role } from "@/generated/prisma/client";
 import { TIME_SLOTS } from "@/lib/booking-settings";
-import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from "@/lib/pagination";
+import {
+  CARD_PAGE_SIZES,
+  DEFAULT_CARD_PAGE_SIZE,
+  DEFAULT_PAGE_SIZE,
+  PAGE_SIZES,
+} from "@/lib/pagination";
 import { RESOURCE_SORTS } from "@/lib/resource-types";
 import { USER_SORTS } from "@/lib/user-display";
 
@@ -48,12 +53,16 @@ export const resourceSchema = z.object({
 export type ResourceInput = z.infer<typeof resourceSchema>;
 
 // Page and rows-per-page from the URL. Bad values fall back to defaults.
+// Rows per page must be one of the allowed sizes.
+const sizeField = (sizes: readonly number[], fallback: number) =>
+  z.coerce
+    .number()
+    .refine((n) => sizes.includes(n))
+    .catch(fallback);
+
 const pageFields = {
   page: z.coerce.number().int().min(1).catch(1),
-  size: z.coerce
-    .number()
-    .refine((n) => (PAGE_SIZES as readonly number[]).includes(n))
-    .catch(DEFAULT_PAGE_SIZE),
+  size: sizeField(PAGE_SIZES, DEFAULT_PAGE_SIZE),
 };
 
 // URL filters for the resources list. Bad values fall back to defaults.
@@ -63,6 +72,16 @@ export const resourceFilterSchema = z.object({
   status: z.enum(["active", "inactive"]).optional().catch(undefined),
   sort: z.enum(RESOURCE_SORTS).catch("oldest"),
   ...pageFields,
+});
+
+// URL filters for the member resources page (active resources only).
+export const memberResourceFilterSchema = z.object({
+  q: z.string().trim().max(80).catch(""),
+  type: z.enum(ResourceType).optional().catch(undefined),
+  sort: z.enum(RESOURCE_SORTS).catch("oldest"),
+  view: z.enum(["grid", "list"]).catch("grid"),
+  page: z.coerce.number().int().min(1).catch(1),
+  size: sizeField(CARD_PAGE_SIZES, DEFAULT_CARD_PAGE_SIZE),
 });
 
 // Fields shared by Add user and Edit user.

@@ -1,45 +1,25 @@
 import Link from "next/link";
 import { setResourceActive } from "@/actions/resources";
-import {
-  EquipmentIcon,
-  PlusIcon,
-  ResourcesIcon,
-  RoomIcon,
-  VehicleIcon,
-} from "@/components/app-icons";
+import { PlusIcon } from "@/components/app-icons";
 import ConfirmButton from "@/components/confirm-button";
 import FilterTabs from "@/components/filter-tabs";
+import ResourcePhoto from "@/components/resource-photo";
 import SearchFilters from "@/components/search-filters";
 import SortSelect from "@/components/sort-select";
 import StatusPill from "@/components/status-pill";
 import SubmitButton from "@/components/submit-button";
 import TablePagination from "@/components/table-pagination";
-import type { Prisma, ResourceType } from "@/generated/prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 import { requireAdmin } from "@/lib/auth-guard";
 import { db } from "@/lib/db";
 import {
+  RESOURCE_ORDER_BY,
   RESOURCE_SORT_LABELS,
   RESOURCE_TYPE_LABELS,
-  type ResourceSort,
 } from "@/lib/resource-types";
 import { resourceFilterSchema } from "@/lib/validation";
 
 export const metadata = { title: "Resources | Resource Reservation" };
-
-// Each sort choice -> database order. Name breaks ties.
-const ORDER_BY = {
-  oldest: [{ createdAt: "asc" }, { name: "asc" }],
-  newest: [{ createdAt: "desc" }, { name: "asc" }],
-  name: [{ name: "asc" }],
-} satisfies Record<ResourceSort, Prisma.ResourceOrderByWithRelationInput[]>;
-
-// Small icon next to each name, so types are easy to spot.
-const TYPE_ICONS: Record<ResourceType, typeof RoomIcon> = {
-  ROOM: RoomIcon,
-  EQUIPMENT: EquipmentIcon,
-  VEHICLE: VehicleIcon,
-  OTHER: ResourcesIcon,
-};
 
 // Same width for Activate and Deactivate, so Edit buttons line up.
 const TOGGLE_CLASS =
@@ -86,7 +66,7 @@ export default async function AdminResourcesPage({
   // Only one page of rows comes from the database.
   const resources = await db.resource.findMany({
     where: { ...baseWhere, ...(status && { isActive: status === "active" }) },
-    orderBy: ORDER_BY[sort],
+    orderBy: RESOURCE_ORDER_BY[sort],
     skip: (currentPage - 1) * size,
     take: size,
     include: {
@@ -160,7 +140,6 @@ export default async function AdminResourcesPage({
             <tbody className="divide-y divide-gray-100">
               {resources.map((r) => {
                 const upcoming = r._count.reservations;
-                const TypeIcon = TYPE_ICONS[r.type];
                 return (
                   <tr
                     key={r.id}
@@ -168,15 +147,12 @@ export default async function AdminResourcesPage({
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <span
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                            r.isActive
-                              ? "bg-brand-50 text-brand-700"
-                              : "bg-gray-100 text-gray-400"
-                          }`}
-                        >
-                          <TypeIcon className="h-4 w-4" />
-                        </span>
+                        <ResourcePhoto
+                          imageName={r.imageName}
+                          type={r.type}
+                          variant="thumb"
+                          muted={!r.isActive}
+                        />
                         <div className="min-w-0">
                           <div className="font-medium text-gray-900">
                             {r.name}
