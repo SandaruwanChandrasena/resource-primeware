@@ -1,7 +1,12 @@
 import Link from "next/link";
-import { getInitials } from "@/lib/config/user-display";
+import UserAvatar from "@/components/ui/user-avatar";
 
-type ProfileLinkProps = { name: string; href: string; active?: boolean };
+type ProfileLinkProps = {
+  name: string;
+  imageName: string | null;
+  href: string;
+  active?: boolean;
+};
 
 // Soft blue glow, shared with the admin sidebar card.
 export const AVATAR_GLOW =
@@ -11,6 +16,7 @@ export const AVATAR_GLOW =
 // Hover: light blue + small grow; click: small press, so it feels clickable.
 export default function ProfileLink({
   name,
+  imageName,
   href,
   active = false,
 }: ProfileLinkProps) {
@@ -24,9 +30,12 @@ export default function ProfileLink({
       title="My profile"
       className={`group flex shrink-0 cursor-pointer items-center rounded-full bg-white p-0.5 ring-2 ring-brand-600/40 transition-all duration-500 ease-out hover:bg-brand-50 hover:ring-brand-600/70 active:scale-95 focus:outline-none focus-visible:ring-brand-600 motion-reduce:transition-none ${AVATAR_GLOW}`}
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none">
-        {getInitials(name)}
-      </span>
+      <UserAvatar
+        name={name}
+        imageName={imageName}
+        size="md"
+        className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
+      />
       {/* Width 0 -> full: the avatar slides left as the name appears. */}
       <span className="max-w-0 overflow-hidden whitespace-nowrap text-sm font-medium text-brand-700 opacity-0 transition-all duration-500 ease-out group-hover:max-w-32 group-hover:px-2.5 group-hover:opacity-100 group-focus-visible:max-w-32 group-focus-visible:px-2.5 group-focus-visible:opacity-100 motion-reduce:transition-none">
         {firstName}

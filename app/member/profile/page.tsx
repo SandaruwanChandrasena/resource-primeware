@@ -16,6 +16,7 @@ export default async function MemberProfilePage() {
       email: true,
       phone: true,
       department: true,
+      imageName: true,
       role: true,
       createdAt: true,
     },
@@ -26,7 +27,7 @@ export default async function MemberProfilePage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">My profile</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Your account details and password.
+          Your account details, photo and password.
         </p>
       </div>
       <div className="grid items-start gap-6 lg:grid-cols-2">

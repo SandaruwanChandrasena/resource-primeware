@@ -21,7 +21,9 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function MemberNavbar({ name }: { name: string }) {
+type MemberNavbarProps = { name: string; imageName: string | null };
+
+export default function MemberNavbar({ name, imageName }: MemberNavbarProps) {
   const pathname = usePathname();
 
   return (
@@ -52,6 +54,7 @@ export default function MemberNavbar({ name }: { name: string }) {
         <div className="flex items-center gap-3">
           <ProfileLink
             name={name}
+            imageName={imageName}
             href="/member/profile"
             active={pathname === "/member/profile"}
           />

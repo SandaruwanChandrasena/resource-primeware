@@ -37,6 +37,7 @@ model User {
   password   String   // bcrypt hash, never sent to the browser
   role       Role     @default(MEMBER)
   department String?
+  imageName  String?  @map("image_name") // profile photo file in /uploads, or null
   isActive   Boolean  @default(true) @map("is_active")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
 

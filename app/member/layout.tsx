@@ -14,7 +14,7 @@ export default async function MemberLayout({
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-linear-to-b from-brand-100 to-transparent"
       />
-      <MemberNavbar name={user.name} />
+      <MemberNavbar name={user.name} imageName={user.imageName} />
       <main className="relative mx-auto max-w-6xl px-4 py-8">{children}</main>
     </div>
   );

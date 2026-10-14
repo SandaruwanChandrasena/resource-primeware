@@ -7,10 +7,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/security/auth-guard";
 import { demoDelay } from "@/lib/utils/demo-delay";
-import {
-  deleteResourceImage,
-  saveResourceImage,
-} from "@/lib/services/resource-images";
+import { deleteImage, saveImage } from "@/lib/services/image-files";
 import { resourceSchema, type ResourceInput } from "@/lib/validation";
 
 export type ResourceFormState =
@@ -77,7 +74,7 @@ export async function createResource(
   const { file } = readPhoto(formData);
   let imageName: string | null = null;
   if (file) {
-    const saved = await saveResourceImage(file);
+    const saved = await saveImage("resource-images", file);
     if ("error" in saved)
       return { fieldErrors: { image: [saved.error] }, values, attempt };
     imageName = saved.name;
@@ -87,7 +84,7 @@ export async function createResource(
     await db.resource.create({ data: { ...parsed.data, imageName } });
   } catch (error) {
     // The save failed, so remove the photo we just stored.
-    await deleteResourceImage(imageName);
+    await deleteImage("resource-images", imageName);
     return { error: friendlyDbError(error), values, attempt };
   }
 
@@ -126,7 +123,7 @@ export async function updateResource(
   const { file, remove } = readPhoto(formData);
   let newImage: string | null = null;
   if (file) {
-    const saved = await saveResourceImage(file);
+    const saved = await saveImage("resource-images", file);
     if ("error" in saved)
       return { fieldErrors: { image: [saved.error] }, values, attempt };
     newImage = saved.name;
@@ -139,13 +136,13 @@ export async function updateResource(
       data: { ...parsed.data, imageName },
     });
   } catch (error) {
-    await deleteResourceImage(newImage);
+    await deleteImage("resource-images", newImage);
     return { error: friendlyDbError(error), values, attempt };
   }
 
   // Remove the old file only after the database points to the new one.
   if (imageName !== current.imageName)
-    await deleteResourceImage(current.imageName);
+    await deleteImage("resource-images", current.imageName);
 
   revalidatePath("/admin/resources");
   revalidatePath("/member/resources", "layout");

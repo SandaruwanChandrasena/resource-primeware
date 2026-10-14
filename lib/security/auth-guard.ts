@@ -16,6 +16,7 @@ export const getCurrentUser = cache(async () => {
       email: true,
       role: true,
       department: true,
+      imageName: true,
       isActive: true,
     },
   });

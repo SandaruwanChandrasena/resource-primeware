@@ -12,7 +12,7 @@ import {
   UsersIcon,
 } from "@/components/layout/app-icons";
 import SubmitButton from "@/components/ui/submit-button";
-import { getInitials } from "@/lib/config/user-display";
+import UserAvatar from "@/components/ui/user-avatar";
 
 // Add one line here when a new admin page is built (D48).
 const NAV_ITEMS = [
@@ -27,7 +27,9 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function AdminSidebar({ name }: { name: string }) {
+type AdminSidebarProps = { name: string; imageName: string | null };
+
+export default function AdminSidebar({ name, imageName }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -38,6 +40,7 @@ export default function AdminSidebar({ name }: { name: string }) {
         <div className="flex items-center gap-2 md:hidden">
           <ProfileLink
             name={name}
+            imageName={imageName}
             href="/admin/profile"
             active={pathname === "/admin/profile"}
           />
@@ -89,11 +92,12 @@ export default function AdminSidebar({ name }: { name: string }) {
           title="My profile"
           className="group -m-1 flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-lg p-1 transition-colors hover:bg-brand-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
         >
-          <span
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 ring-2 ring-brand-600/40 ring-offset-2 transition-all duration-300 group-hover:scale-105 group-hover:ring-brand-600/70 group-active:scale-95 motion-reduce:transition-none ${AVATAR_GLOW}`}
-          >
-            {getInitials(name)}
-          </span>
+          <UserAvatar
+            name={name}
+            imageName={imageName}
+            size="md"
+            className={`ring-2 ring-brand-600/40 ring-offset-2 transition-all duration-300 group-hover:scale-105 group-hover:ring-brand-600/70 group-active:scale-95 motion-reduce:transition-none ${AVATAR_GLOW}`}
+          />
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{name}</span>
             <span className="block text-xs text-gray-500 group-hover:text-brand-700">
