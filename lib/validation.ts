@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ResourceType, Role } from "@/generated/prisma/client";
+import { TIME_SLOTS } from "@/lib/booking-settings";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from "@/lib/pagination";
 import { RESOURCE_SORTS } from "@/lib/resource-types";
 import { USER_SORTS } from "@/lib/user-display";
@@ -124,3 +125,26 @@ export const userFilterSchema = z.object({
   sort: z.enum(USER_SORTS).catch("oldest"),
   ...pageFields,
 });
+
+// Only times from the booking slots are allowed.
+const timeSlot = (message: string) =>
+  z.string().refine((t) => TIME_SLOTS.includes(t), message);
+
+// New booking. Past, too-far and overlap checks are in booking-rules.ts.
+export const bookingSchema = z
+  .object({
+    resourceId: z.uuid("This resource no longer exists."),
+    date: z.iso.date("Choose a date."),
+    startTime: timeSlot("Choose a start time."),
+    endTime: timeSlot("Choose an end time."),
+    purpose: z
+      .string()
+      .trim()
+      .min(3, "Purpose must be at least 3 characters.")
+      .max(200, "Purpose is too long (max 200)."),
+  })
+  // "HH:MM" text sorts like time, so a text compare works (D20).
+  .refine((b) => b.endTime > b.startTime, {
+    message: "End time must be after start time.",
+    path: ["endTime"],
+  });

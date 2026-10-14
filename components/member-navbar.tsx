@@ -9,7 +9,10 @@ import SubmitButton from "@/components/submit-button";
 import { getInitials } from "@/lib/user-display";
 
 // Add one line here when a new member page is built (D48).
-const NAV_ITEMS = [{ href: "/member", label: "Home" }];
+const NAV_ITEMS = [
+  { href: "/member", label: "Home" },
+  { href: "/member/resources", label: "Resources" },
+];
 
 // "/member" must match exactly; other links also match their sub-pages.
 function isActive(pathname: string, href: string) {
@@ -34,7 +37,9 @@ export default function MemberNavbar({ name }: { name: string }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  active ? "bg-brand-50 text-brand-700" : "text-gray-600 hover:bg-white/70 hover:text-gray-900"
+                  active
+                    ? "bg-brand-50 text-brand-700"
+                    : "text-gray-600 hover:bg-white/70 hover:text-gray-900"
                 }`}
               >
                 {label}
