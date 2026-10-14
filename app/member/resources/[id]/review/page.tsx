@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import BookingConfirm from "@/components/forms/booking-confirm";
+import NotifyMeButton from "@/components/forms/notify-me-button";
 import ResourcePhoto from "@/components/ui/resource-photo";
 import { requireMember } from "@/lib/security/auth-guard";
 import {
@@ -135,7 +136,18 @@ export default async function ReviewBookingPage({
               >
                 {check.error}
               </p>
-              <div className="flex justify-end">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                {/* Only a clash can be waited for; other problems need a change (D3). */}
+                {"isClash" in check && check.isClash ? (
+                  <NotifyMeButton
+                    resourceId={id}
+                    date={values.date}
+                    startTime={values.startTime}
+                    endTime={values.endTime}
+                  />
+                ) : (
+                  <span />
+                )}
                 <Link
                   href={changeHref}
                   className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"

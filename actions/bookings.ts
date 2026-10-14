@@ -6,7 +6,8 @@ import { z } from "zod";
 import { requireUser } from "@/lib/security/auth-guard";
 import { demoDelay } from "@/lib/utils/demo-delay";
 import { cancelOwnBooking, createBooking } from "@/lib/services/booking-rules";
-import { bookingSchema } from "@/lib/validation";
+import { joinWaitlist } from "@/lib/services/waitlist";
+import { bookingSchema, waitlistSchema } from "@/lib/validation";
 
 export type ConfirmBookingState =
   | { error?: string; isClash?: boolean }
@@ -46,4 +47,26 @@ export async function cancelMyBooking(reservationId: string) {
   // false = already cancelled, started, or not yours: the page just shows the real state.
   await cancelOwnBooking(id, user.id);
   revalidatePath("/member", "layout");
+}
+
+export type NotifyMeState = { ok: boolean; message: string } | undefined;
+
+// "Notify me" on the clash message (D3). The user comes from the session (D67).
+export async function notifyMe(
+  _prev: NotifyMeState,
+  formData: FormData,
+): Promise<NotifyMeState> {
+  const user = await requireUser();
+  await demoDelay();
+
+  const parsed = waitlistSchema.safeParse({
+    resourceId: formData.get("resourceId"),
+    date: formData.get("date"),
+    startTime: formData.get("startTime"),
+    endTime: formData.get("endTime"),
+  });
+  if (!parsed.success)
+    return { ok: false, message: parsed.error.issues[0].message };
+
+  return joinWaitlist(user.id, parsed.data);
 }

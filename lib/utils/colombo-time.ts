@@ -39,6 +39,11 @@ export function todayInColombo() {
   return dateKey.format(new Date());
 }
 
+// A moment -> its Sri Lanka date, e.g. "2026-10-15" (for links and forms).
+export function toColomboDate(date: Date) {
+  return dateKey.format(date);
+}
+
 // Time now in Sri Lanka, e.g. "13:45".
 export function nowTimeInColombo() {
   return clock.format(new Date());

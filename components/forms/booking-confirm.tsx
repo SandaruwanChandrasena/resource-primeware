@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { confirmBooking, type ConfirmBookingState } from "@/actions/bookings";
+import NotifyMeButton from "@/components/forms/notify-me-button";
 import SubmitButton from "@/components/ui/submit-button";
 import type { BookingFormValues } from "@/components/forms/booking-form";
 
@@ -24,7 +25,7 @@ export default function BookingConfirm({
   );
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       {/* Someone may book this time while you read the page; the server checks again. */}
       {state?.error && (
         <p
@@ -35,28 +36,42 @@ export default function BookingConfirm({
         </p>
       )}
 
-      <input type="hidden" name="resourceId" value={resourceId} />
-      <input type="hidden" name="date" value={values.date} />
-      <input type="hidden" name="startTime" value={values.startTime} />
-      <input type="hidden" name="endTime" value={values.endTime} />
-      <input type="hidden" name="purpose" value={values.purpose} />
-
-      <div className="flex justify-end gap-3">
-        <Link
-          href={changeHref}
-          className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Change
-        </Link>
-        {!state?.isClash && (
-          <SubmitButton
-            pendingText="Booking..."
-            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          >
-            Confirm booking
-          </SubmitButton>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        {/* Its own form, so it sits outside the confirm form (no nested forms). */}
+        {state?.isClash ? (
+          <NotifyMeButton
+            resourceId={resourceId}
+            date={values.date}
+            startTime={values.startTime}
+            endTime={values.endTime}
+          />
+        ) : (
+          <span />
         )}
+
+        <form action={formAction} className="flex gap-3">
+          <input type="hidden" name="resourceId" value={resourceId} />
+          <input type="hidden" name="date" value={values.date} />
+          <input type="hidden" name="startTime" value={values.startTime} />
+          <input type="hidden" name="endTime" value={values.endTime} />
+          <input type="hidden" name="purpose" value={values.purpose} />
+
+          <Link
+            href={changeHref}
+            className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Change
+          </Link>
+          {!state?.isClash && (
+            <SubmitButton
+              pendingText="Booking..."
+              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            >
+              Confirm booking
+            </SubmitButton>
+          )}
+        </form>
       </div>
-    </form>
+    </div>
   );
 }

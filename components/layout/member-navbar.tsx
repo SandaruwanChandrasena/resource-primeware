@@ -28,7 +28,7 @@ export default function MemberNavbar({ name, imageName }: MemberNavbarProps) {
 
   return (
     <header className="sticky top-0 z-10 border-b border-gray-200/80 bg-white/70 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+      <div className="mx-auto flex h-16 max-w-[96rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <AppLogo href="/member" hideTextOnMobile />
 
         <nav aria-label="Member" className="flex gap-1 overflow-x-auto">

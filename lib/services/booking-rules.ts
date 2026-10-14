@@ -8,6 +8,7 @@ import {
 } from "@/lib/utils/colombo-time";
 import { db } from "@/lib/db";
 import { demoDelay } from "@/lib/utils/demo-delay";
+import { notifyWaiting } from "@/lib/services/waitlist";
 
 // Shared booking rules for members and admins (D53).
 
@@ -158,7 +159,7 @@ export async function createBooking(
 }
 
 // Cancel = change the status, never delete (D7). Who and when are saved (D28).
-// One transaction, so Stage 5 can notify waiting people in the same step (D6).
+// One transaction: cancel + tell waiting people, all or nothing (D6).
 export async function cancelOwnBooking(reservationId: string, userId: string) {
   return db.$transaction(async (tx) => {
     const result = await tx.reservation.updateMany({
@@ -175,6 +176,24 @@ export async function cancelOwnBooking(reservationId: string, userId: string) {
         cancelledById: userId,
       },
     });
-    return result.count === 1;
+    if (result.count !== 1) return false;
+
+    // The freed time: tell people on the "Notify me" list (D78).
+    const freed = await tx.reservation.findUniqueOrThrow({
+      where: { id: reservationId },
+      select: {
+        resourceId: true,
+        startTime: true,
+        endTime: true,
+        resource: { select: { name: true } },
+      },
+    });
+    await notifyWaiting(tx, {
+      resourceId: freed.resourceId,
+      resourceName: freed.resource.name,
+      start: freed.startTime,
+      end: freed.endTime,
+    });
+    return true;
   });
 }

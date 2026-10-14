@@ -179,6 +179,21 @@ export const bookingSchema = z
     path: ["endTime"],
   });
 
+// "Notify me": the same time fields as a booking, no purpose (D3).
+export const waitlistSchema = z
+  .object({
+    resourceId: z.uuid("This resource no longer exists."),
+    date: z.iso.date("Choose a date."),
+    startTime: timeSlot("Choose a start time."),
+    endTime: timeSlot("Choose an end time."),
+  })
+  .refine((w) => w.endTime > w.startTime, {
+    message: "End time must be after start time.",
+    path: ["endTime"],
+  });
+
+export type WaitlistRequest = z.infer<typeof waitlistSchema>;
+
 // URL filters for "My bookings". No tab = upcoming.
 export const myBookingsFilterSchema = z.object({
   tab: z.enum(["past", "cancelled"]).optional().catch(undefined),
