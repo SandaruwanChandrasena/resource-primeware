@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
 import AppLogo from "@/components/layout/app-logo";
+import ProfileLink, { AVATAR_GLOW } from "@/components/layout/profile-link";
 import {
   DashboardIcon,
   LogoutIcon,
@@ -33,14 +34,22 @@ export default function AdminSidebar({ name }: { name: string }) {
     <aside className="flex flex-col gap-3 border-b border-gray-200 bg-white p-3 md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:gap-6 md:border-b-0 md:border-r md:p-4">
       <div className="flex items-center justify-between">
         <AppLogo href="/admin" />
-        <form action={logout} className="md:hidden">
-          <SubmitButton
-            aria-label="Log out"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-          >
-            <LogoutIcon />
-          </SubmitButton>
-        </form>
+        {/* Phones: avatar + log out in the top bar. */}
+        <div className="flex items-center gap-2 md:hidden">
+          <ProfileLink
+            name={name}
+            href="/admin/profile"
+            active={pathname === "/admin/profile"}
+          />
+          <form action={logout}>
+            <SubmitButton
+              aria-label="Log out"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+            >
+              <LogoutIcon />
+            </SubmitButton>
+          </form>
+        </div>
       </div>
 
       <div>
@@ -73,14 +82,26 @@ export default function AdminSidebar({ name }: { name: string }) {
       </div>
 
       <div className="mt-auto hidden items-center gap-3 rounded-xl bg-gray-50 p-3 md:flex">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
-          {getInitials(name)}
-        </span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold">{name}</p>
-          <p className="text-xs text-gray-500">Administrator</p>
-        </div>
-        <form action={logout} className="ml-auto">
+        {/* The name is already shown here, so the avatar only glows. */}
+        <Link
+          href="/admin/profile"
+          aria-current={pathname === "/admin/profile" ? "page" : undefined}
+          title="My profile"
+          className="group flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 -m-1 hover:bg-gray-100"
+        >
+          <span
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 ring-2 ring-brand-600/40 ring-offset-2 transition-all duration-500 group-hover:ring-brand-600/70 ${AVATAR_GLOW}`}
+          >
+            {getInitials(name)}
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold">{name}</span>
+            <span className="block text-xs text-gray-500">
+              Administrator · My profile
+            </span>
+          </span>
+        </Link>
+        <form action={logout} className="shrink-0">
           <SubmitButton
             aria-label="Log out"
             title="Log out"

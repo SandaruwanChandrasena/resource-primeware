@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
 import AppLogo from "@/components/layout/app-logo";
 import { LogoutIcon } from "@/components/layout/app-icons";
+import ProfileLink from "@/components/layout/profile-link";
 import SubmitButton from "@/components/ui/submit-button";
-import { getInitials } from "@/lib/config/user-display";
 
 // Add one line here when a new member page is built (D48).
 const NAV_ITEMS = [
@@ -50,12 +50,11 @@ export default function MemberNavbar({ name }: { name: string }) {
         </nav>
 
         <div className="flex items-center gap-3">
-          <span
-            title={name}
-            className="hidden h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700 sm:flex"
-          >
-            {getInitials(name)}
-          </span>
+          <ProfileLink
+            name={name}
+            href="/member/profile"
+            active={pathname === "/member/profile"}
+          />
           <form action={logout}>
             <SubmitButton
               aria-label="Log out"

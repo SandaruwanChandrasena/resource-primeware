@@ -136,6 +136,17 @@ export const userUpdateSchema = z.object({
 
 export type UserInput = z.infer<typeof userCreateSchema>;
 
+// Profile: change your own password. Both boxes must match.
+export const passwordChangeSchema = z
+  .object({
+    newPassword: passwordRule,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "The two passwords don't match.",
+    path: ["confirmPassword"],
+  });
+
 // URL filters for the users list.
 export const userFilterSchema = z.object({
   q: z.string().trim().max(80).catch(""),
