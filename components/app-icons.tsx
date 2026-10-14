@@ -1,6 +1,9 @@
 type IconProps = { className?: string };
 
-function Svg({ className = "h-5 w-5", children }: IconProps & { children: React.ReactNode }) {
+function Svg({
+  className = "h-5 w-5",
+  children,
+}: IconProps & { children: React.ReactNode }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -80,6 +83,59 @@ export function PlusIcon(props: IconProps) {
   return (
     <Svg {...props}>
       <path d="M12 5v14M5 12h14" />
+    </Svg>
+  );
+}
+export function RoomIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17" />
+      <path d="M3 21h18M15 12h.01" />
+    </Svg>
+  );
+}
+
+export function EquipmentIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="3" y="4" width="18" height="12" rx="2" />
+      <path d="M8 20h8M12 16v4" />
+    </Svg>
+  );
+}
+
+export function VehicleIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M5 17h-.5A1.5 1.5 0 0 1 3 15.5V11l2-5h10l4 5h.5a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5H19" />
+      <circle cx="7.5" cy="17" r="1.5" />
+      <circle cx="16.5" cy="17" r="1.5" />
+      <path d="M9 17h6M3 11h16" />
+    </Svg>
+  );
+}
+
+export function SearchIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </Svg>
+  );
+}
+
+export function ChevronLeftIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M15 18l-6-6 6-6" />
+    </Svg>
+  );
+}
+
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M9 18l6-6-6-6" />
     </Svg>
   );
 }

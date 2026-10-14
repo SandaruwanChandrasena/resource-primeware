@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ResourceType } from "@/generated/prisma/client";
+import { DEFAULT_PAGE_SIZE, PAGE_SIZES } from "@/lib/pagination";
 import { RESOURCE_SORTS } from "@/lib/resource-types";
 
 // Clean the email first, then check that it looks like an email.
@@ -50,4 +51,9 @@ export const resourceFilterSchema = z.object({
   type: z.enum(ResourceType).optional().catch(undefined),
   status: z.enum(["active", "inactive"]).optional().catch(undefined),
   sort: z.enum(RESOURCE_SORTS).catch("oldest"),
+  page: z.coerce.number().int().min(1).catch(1),
+  size: z.coerce
+    .number()
+    .refine((n) => (PAGE_SIZES as readonly number[]).includes(n))
+    .catch(DEFAULT_PAGE_SIZE),
 });
