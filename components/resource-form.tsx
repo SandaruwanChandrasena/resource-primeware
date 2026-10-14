@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   createResource,
   updateResource,
   type ResourceFormState,
 } from "@/actions/resources";
+import SelectMenu, { toOptions } from "@/components/select-menu";
 import SubmitButton from "@/components/submit-button";
 import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
 
@@ -50,6 +51,7 @@ export default function ResourceForm({ resource }: ResourceFormProps) {
   };
   const fieldError = (field: keyof typeof values) =>
     state?.fieldErrors?.[field]?.[0];
+  const [type, setType] = useState(values.type);
 
   return (
     <form
@@ -79,26 +81,20 @@ export default function ResourceForm({ resource }: ResourceFormProps) {
           <FieldError message={fieldError("name")} />
         </label>
 
-        <label className={labelClass}>
-          Type
-          <select
+        {/* A div, not a label: a label would re-open the menu on click. */}
+        <div className={labelClass}>
+          <span>Type</span>
+          <SelectMenu
             name="type"
-            required
-            defaultValue={values.type}
-            aria-invalid={!!fieldError("type")}
-            className={`${inputClass} bg-white`}
-          >
-            <option value="" disabled>
-              Choose a type
-            </option>
-            {Object.entries(RESOURCE_TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+            label="Type"
+            placeholder="Choose a type"
+            options={toOptions(RESOURCE_TYPE_LABELS)}
+            value={type}
+            onChange={setType}
+            invalid={!!fieldError("type")}
+          />
           <FieldError message={fieldError("type")} />
-        </label>
+        </div>
 
         <label className={labelClass}>
           Location

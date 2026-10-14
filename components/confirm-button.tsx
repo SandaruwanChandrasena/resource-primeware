@@ -2,7 +2,7 @@
 
 import { useId, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import Spinner from "@/components/spinner";
+import PendingLabel from "@/components/pending-label";
 
 type ConfirmButtonProps = {
   action: () => Promise<void>;
@@ -14,8 +14,18 @@ type ConfirmButtonProps = {
   pendingText: string;
 };
 
+type DialogButtonsProps = {
+  confirmLabel: string;
+  pendingText: string;
+  onCancel: () => void;
+};
+
 // Inside the form, so it can read the pending state.
-function DialogButtons({ confirmLabel, pendingText, onCancel }: { confirmLabel: string; pendingText: string; onCancel: () => void }) {
+function DialogButtons({
+  confirmLabel,
+  pendingText,
+  onCancel,
+}: DialogButtonsProps) {
   const { pending } = useFormStatus();
 
   return (
@@ -32,17 +42,26 @@ function DialogButtons({ confirmLabel, pendingText, onCancel }: { confirmLabel: 
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+        className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
       >
-        {pending && <Spinner />}
-        {pending ? pendingText : confirmLabel}
+        <PendingLabel pending={pending} pendingText={pendingText}>
+          {confirmLabel}
+        </PendingLabel>
       </button>
     </div>
   );
 }
 
 // Reusable: asks "Are you sure?" before a risky action runs.
-export default function ConfirmButton({ action, label, className, title, message, confirmLabel, pendingText }: ConfirmButtonProps) {
+export default function ConfirmButton({
+  action,
+  label,
+  className,
+  title,
+  message,
+  confirmLabel,
+  pendingText,
+}: ConfirmButtonProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const close = () => dialogRef.current?.close();
@@ -54,7 +73,11 @@ export default function ConfirmButton({ action, label, className, title, message
 
   return (
     <>
-      <button type="button" onClick={() => dialogRef.current?.showModal()} className={className}>
+      <button
+        type="button"
+        onClick={() => dialogRef.current?.showModal()}
+        className={className}
+      >
         {label}
       </button>
 
@@ -70,7 +93,11 @@ export default function ConfirmButton({ action, label, className, title, message
             {title}
           </h2>
           <p className="mt-2 text-sm text-gray-600">{message}</p>
-          <DialogButtons confirmLabel={confirmLabel} pendingText={pendingText} onCancel={close} />
+          <DialogButtons
+            confirmLabel={confirmLabel}
+            pendingText={pendingText}
+            onCancel={close}
+          />
         </form>
       </dialog>
     </>

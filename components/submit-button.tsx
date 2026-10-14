@@ -2,24 +2,31 @@
 
 import type { ComponentProps } from "react";
 import { useFormStatus } from "react-dom";
-import Spinner from "@/components/spinner";
+import PendingLabel from "@/components/pending-label";
 
-type SubmitButtonProps = Omit<ComponentProps<"button">, "type"> & { pendingText?: string };
+type SubmitButtonProps = Omit<ComponentProps<"button">, "type"> & {
+  pendingText?: string;
+};
 
 // Reusable: shows a spinner and blocks double clicks while its form runs.
-export default function SubmitButton({ children, pendingText, disabled, ...rest }: SubmitButtonProps) {
+export default function SubmitButton({
+  children,
+  pendingText,
+  disabled,
+  ...rest
+}: SubmitButtonProps) {
   const { pending } = useFormStatus();
 
   return (
-    <button type="submit" disabled={pending || disabled} aria-busy={pending} {...rest}>
-      {pending ? (
-        <>
-          <Spinner />
-          {pendingText}
-        </>
-      ) : (
-        children
-      )}
+    <button
+      type="submit"
+      disabled={pending || disabled}
+      aria-busy={pending}
+      {...rest}
+    >
+      <PendingLabel pending={pending} pendingText={pendingText}>
+        {children}
+      </PendingLabel>
     </button>
   );
 }

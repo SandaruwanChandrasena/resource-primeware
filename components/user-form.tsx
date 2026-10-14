@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createUser, updateUser, type UserFormState } from "@/actions/users";
+import SelectMenu, { toOptions } from "@/components/select-menu";
 import SubmitButton from "@/components/submit-button";
 import { ROLE_LABELS } from "@/lib/user-display";
 
@@ -34,7 +35,10 @@ function Optional() {
 // One form for Add and Edit (D51). Edit = form filled with the user.
 export default function UserForm({ user, isSelf = false }: UserFormProps) {
   const action = user ? updateUser.bind(null, user.id) : createUser;
-  const [state, formAction] = useActionState<UserFormState, FormData>(action, undefined);
+  const [state, formAction] = useActionState<UserFormState, FormData>(
+    action,
+    undefined,
+  );
 
   // After an error, show what the admin typed; else show saved values.
   const values = state?.values ?? {
@@ -44,12 +48,20 @@ export default function UserForm({ user, isSelf = false }: UserFormProps) {
     department: user?.department ?? "",
     role: user?.role ?? "MEMBER",
   };
-  const fieldError = (field: keyof typeof values | "password") => state?.fieldErrors?.[field]?.[0];
+  const fieldError = (field: keyof typeof values | "password") =>
+    state?.fieldErrors?.[field]?.[0];
+  const [role, setRole] = useState(values.role);
 
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-5 rounded-xl border border-gray-200 bg-white p-6">
+    <form
+      action={formAction}
+      className="flex max-w-2xl flex-col gap-5 rounded-xl border border-gray-200 bg-white p-6"
+    >
       {state?.error && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p
+          role="alert"
+          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
           {state.error}
         </p>
       )}
@@ -57,7 +69,13 @@ export default function UserForm({ user, isSelf = false }: UserFormProps) {
       <div className="grid gap-5 sm:grid-cols-2">
         <label className={labelClass}>
           Name
-          <input name="name" required maxLength={80} defaultValue={values.name} className={inputClass} />
+          <input
+            name="name"
+            required
+            maxLength={80}
+            defaultValue={values.name}
+            className={inputClass}
+          />
           <FieldError message={fieldError("name")} />
         </label>
 
@@ -104,25 +122,26 @@ export default function UserForm({ user, isSelf = false }: UserFormProps) {
           <FieldError message={fieldError("department")} />
         </label>
 
-        <label className={labelClass}>
-          Role
-          <select
-            name={isSelf ? undefined : "role"}
-            defaultValue={values.role}
+        {/* A div, not a label: a label would re-open the menu on click. */}
+        <div className={labelClass}>
+          <span>Role</span>
+          <SelectMenu
+            name="role"
+            label="Role"
+            options={toOptions(ROLE_LABELS)}
+            value={role}
+            onChange={setRole}
             disabled={isSelf}
-            className={`${inputClass} bg-white`}
-          >
-            {Object.entries(ROLE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-          {/* D49: own role is locked. A disabled select is not sent, so send it here. */}
-          {isSelf && <input type="hidden" name="role" value="ADMIN" />}
-          {isSelf && <span className="text-xs font-normal text-gray-500">You can't change your own role.</span>}
+            invalid={!!fieldError("role")}
+          />
+          {/* D49: own role is locked (the server checks it too). */}
+          {isSelf && (
+            <span className="text-xs font-normal text-gray-500">
+              You can't change your own role.
+            </span>
+          )}
           <FieldError message={fieldError("role")} />
-        </label>
+        </div>
 
         <label className={labelClass}>
           {user ? (
@@ -142,7 +161,9 @@ export default function UserForm({ user, isSelf = false }: UserFormProps) {
             className={inputClass}
           />
           <span className="text-xs font-normal text-gray-500">
-            {user ? "Leave empty to keep the current password." : "At least 8 characters."}
+            {user
+              ? "Leave empty to keep the current password."
+              : "At least 8 characters."}
           </span>
           <FieldError message={fieldError("password")} />
         </label>

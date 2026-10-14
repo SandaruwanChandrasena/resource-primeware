@@ -1,5 +1,6 @@
 "use client";
 
+import SelectMenu, { toOptions } from "@/components/select-menu";
 import { useUrlQuery } from "@/lib/url-query";
 
 type SortSelectProps = {
@@ -17,24 +18,18 @@ export default function SortSelect({
   const { update } = useUrlQuery();
 
   return (
-    <label className="flex items-center gap-2 text-sm text-gray-500">
-      Sort
-      <select
+    <div className="flex items-center gap-2 text-sm text-gray-500">
+      <span aria-hidden="true">Sort</span>
+      <SelectMenu
+        label="Sort"
+        size="sm"
+        options={toOptions(options)}
         value={value}
-        onChange={(e) =>
-          update({
-            sort: e.target.value === defaultValue ? undefined : e.target.value,
-            page: undefined,
-          })
+        onChange={(v) =>
+          update({ sort: v === defaultValue ? undefined : v, page: undefined })
         }
-        className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
-      >
-        {Object.entries(options).map(([key, label]) => (
-          <option key={key} value={key}>
-            {label}
-          </option>
-        ))}
-      </select>
-    </label>
+        className="w-36"
+      />
+    </div>
   );
 }

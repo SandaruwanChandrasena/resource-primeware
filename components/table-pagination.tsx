@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeftIcon, ChevronRightIcon } from "@/components/app-icons";
+import SelectMenu from "@/components/select-menu";
 import Spinner from "@/components/spinner";
 import {
   DEFAULT_PAGE_SIZE,
@@ -13,6 +14,10 @@ type TablePaginationProps = { page: number; pageSize: number; total: number };
 
 const pageButton =
   "flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-sm font-medium tabular-nums";
+const sizeOptions = PAGE_SIZES.map((size) => ({
+  value: String(size),
+  label: String(size),
+}));
 
 // Reusable: rows per page + page buttons. Page and size live in the URL.
 export default function TablePagination({
@@ -26,31 +31,28 @@ export default function TablePagination({
 
   return (
     <div className="flex flex-wrap items-center gap-4">
-      {pending && <Spinner className="h-4 w-4 text-gray-400" />}
+      {/* Fixed slot, so the footer does not move when the spinner shows. */}
+      <span className="flex h-4 w-4 text-gray-400">
+        {pending && <Spinner />}
+      </span>
 
-      <label className="flex items-center gap-2 text-sm text-gray-500">
-        Rows per page
-        <select
-          value={pageSize}
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <span aria-hidden="true">Rows per page</span>
+        <SelectMenu
+          label="Rows per page"
+          size="sm"
+          options={sizeOptions}
+          value={String(pageSize)}
           // New size starts again at page 1.
-          onChange={(e) =>
+          onChange={(v) =>
             update({
-              size:
-                Number(e.target.value) === DEFAULT_PAGE_SIZE
-                  ? undefined
-                  : e.target.value,
+              size: Number(v) === DEFAULT_PAGE_SIZE ? undefined : v,
               page: undefined,
             })
           }
-          className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
-        >
-          {PAGE_SIZES.map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
-      </label>
+          className="w-20"
+        />
+      </div>
 
       <nav aria-label="Pages" className="flex items-center gap-1">
         <button
