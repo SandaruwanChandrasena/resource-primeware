@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { createUser, updateUser, type UserFormState } from "@/actions/users";
+import PasswordInput from "@/components/ui/password-input";
 import SelectMenu, { toOptions } from "@/components/ui/select-menu";
 import SubmitButton from "@/components/ui/submit-button";
 import { ROLE_LABELS } from "@/lib/config/user-display";
@@ -151,9 +152,8 @@ export default function UserForm({ user, isSelf = false }: UserFormProps) {
           ) : (
             "Password"
           )}
-          <input
+          <PasswordInput
             name="password"
-            type="password"
             required={!user}
             minLength={8}
             maxLength={72}

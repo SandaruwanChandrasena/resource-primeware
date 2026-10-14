@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { login } from "@/actions/auth";
+import PasswordInput from "@/components/ui/password-input";
 import SubmitButton from "@/components/ui/submit-button";
 
 const inputClass =
@@ -26,9 +27,8 @@ export default function LoginForm() {
 
       <label className="flex flex-col gap-1.5 text-sm font-medium">
         Password
-        <input
+        <PasswordInput
           name="password"
-          type="password"
           required
           autoComplete="current-password"
           className={inputClass}
