@@ -11,7 +11,12 @@ import TablePagination from "@/components/table-pagination";
 import type { Prisma } from "@/generated/prisma/client";
 import { requireAdmin } from "@/lib/auth-guard";
 import { db } from "@/lib/db";
-import { ROLE_LABELS, USER_SORT_LABELS, getInitials, type UserSort } from "@/lib/user-display";
+import {
+  ROLE_LABELS,
+  USER_SORT_LABELS,
+  getInitials,
+  type UserSort,
+} from "@/lib/user-display";
 import { userFilterSchema } from "@/lib/validation";
 
 export const metadata = { title: "Users | Resource Reservation" };
@@ -27,16 +32,25 @@ const ORDER_BY = {
 const TOGGLE_CLASS =
   "flex w-24 items-center justify-center rounded-lg border px-3 py-1.5 text-xs font-medium disabled:opacity-60";
 
-type AdminUsersPageProps = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+type AdminUsersPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
+export default async function AdminUsersPage({
+  searchParams,
+}: AdminUsersPageProps) {
   const admin = await requireAdmin();
-  const { q, role, status, sort, page, size } = userFilterSchema.parse(await searchParams);
+  const { q, role, status, sort, page, size } = userFilterSchema.parse(
+    await searchParams,
+  );
 
   // Search + role apply to every tab; the tab adds the status.
   const baseWhere: Prisma.UserWhereInput = {
     ...(q && {
-      OR: [{ name: { contains: q, mode: "insensitive" } }, { email: { contains: q, mode: "insensitive" } }],
+      OR: [
+        { name: { contains: q, mode: "insensitive" } },
+        { email: { contains: q, mode: "insensitive" } },
+      ],
     }),
     ...(role && { role }),
   };
@@ -45,7 +59,12 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
     db.user.count({ where: { ...baseWhere, isActive: true } }),
   ]);
   const inactiveCount = allCount - activeCount;
-  const total = status === "active" ? activeCount : status === "inactive" ? inactiveCount : allCount;
+  const total =
+    status === "active"
+      ? activeCount
+      : status === "inactive"
+        ? inactiveCount
+        : allCount;
 
   // A page number past the end goes to the last page.
   const totalPages = Math.max(1, Math.ceil(total / size));
@@ -66,7 +85,11 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
       role: true,
       isActive: true,
       _count: {
-        select: { reservations: { where: { status: "CONFIRMED", startTime: { gte: new Date() } } } },
+        select: {
+          reservations: {
+            where: { status: "CONFIRMED", startTime: { gte: new Date() } },
+          },
+        },
       },
     },
   });
@@ -77,7 +100,9 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
     <section className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Users</h1>
-        <p className="mt-1 text-sm text-gray-500">Staff accounts. Only admins can add new people.</p>
+        <p className="mt-1 text-sm text-gray-500">
+          Staff accounts. Only admins can add new people.
+        </p>
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white">
@@ -95,7 +120,13 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
           <SearchFilters
             q={q}
             placeholder="Search name or email"
-            filter={{ param: "role", label: "Filter by role", allLabel: "All roles", value: role ?? "", options: ROLE_LABELS }}
+            filter={{
+              param: "role",
+              label: "Filter by role",
+              allLabel: "All roles",
+              value: role ?? "",
+              options: ROLE_LABELS,
+            }}
           />
           <Link
             href="/admin/users/new"
@@ -116,9 +147,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                 <th className="px-4 py-3 font-semibold">Role</th>
                 <th className="px-4 py-3 font-semibold">Upcoming bookings</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3">
-                  <span className="sr-only">Actions</span>
-                </th>
+                <th className="px-4 py-3 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -134,7 +163,9 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                       <div className="flex items-center gap-3">
                         <span
                           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                            u.isActive ? "bg-brand-100 text-brand-700" : "bg-gray-100 text-gray-400"
+                            u.isActive
+                              ? "bg-brand-100 text-brand-700"
+                              : "bg-gray-100 text-gray-400"
                           }`}
                         >
                           {getInitials(u.name)}
@@ -152,12 +183,20 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3">{u.department ?? "—"}</td>
-                    <td className="whitespace-nowrap px-4 py-3 tabular-nums">{u.phone ?? "—"}</td>
-                    <td className="whitespace-nowrap px-4 py-3">{ROLE_LABELS[u.role]}</td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {u.department ?? "—"}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 tabular-nums">
+                      {u.phone ?? "—"}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      {ROLE_LABELS[u.role]}
+                    </td>
                     <td className="px-4 py-3 tabular-nums">{upcoming}</td>
                     <td className="px-4 py-3">
-                      <StatusPill tone={u.isActive ? "green" : "gray"}>{u.isActive ? "Active" : "Inactive"}</StatusPill>
+                      <StatusPill tone={u.isActive ? "green" : "gray"}>
+                        {u.isActive ? "Active" : "Inactive"}
+                      </StatusPill>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
@@ -202,7 +241,9 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
             </tbody>
           </table>
           {users.length === 0 && (
-            <p className="px-4 py-10 text-center text-sm text-gray-500">No users match your search.</p>
+            <p className="px-4 py-10 text-center text-sm text-gray-500">
+              No users match your search.
+            </p>
           )}
         </div>
 
@@ -211,7 +252,11 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
             <span className="tabular-nums">
               Showing {from}–{to} of {total}
             </span>
-            <SortSelect options={USER_SORT_LABELS} value={sort} defaultValue="oldest" />
+            <SortSelect
+              options={USER_SORT_LABELS}
+              value={sort}
+              defaultValue="oldest"
+            />
           </div>
           <TablePagination page={currentPage} pageSize={size} total={total} />
         </div>
