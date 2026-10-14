@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
 import AppLogo from "@/components/app-logo";
 import { LogoutIcon } from "@/components/app-icons";
+import SubmitButton from "@/components/submit-button";
 import { getInitials } from "@/lib/user-display";
 
 // Add one line here when a new member page is built (D48).
@@ -50,13 +51,13 @@ export default function MemberNavbar({ name }: { name: string }) {
             {getInitials(name)}
           </span>
           <form action={logout}>
-            <button
-              type="submit"
-              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            <SubmitButton
+              aria-label="Log out"
+              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
             >
               <LogoutIcon className="h-4 w-4" />
               <span className="hidden sm:inline">Log out</span>
-            </button>
+            </SubmitButton>
           </form>
         </div>
       </div>

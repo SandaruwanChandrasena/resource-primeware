@@ -4,7 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
 import AppLogo from "@/components/app-logo";
-import { DashboardIcon, LogoutIcon, ResourcesIcon } from "@/components/app-icons";
+import {
+  DashboardIcon,
+  LogoutIcon,
+  ResourcesIcon,
+} from "@/components/app-icons";
+import SubmitButton from "@/components/submit-button";
 import { getInitials } from "@/lib/user-display";
 
 // Add one line here when a new admin page is built (D48).
@@ -27,13 +32,12 @@ export default function AdminSidebar({ name }: { name: string }) {
       <div className="flex items-center justify-between">
         <AppLogo href="/admin" />
         <form action={logout} className="md:hidden">
-          <button
-            type="submit"
+          <SubmitButton
             aria-label="Log out"
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900"
           >
             <LogoutIcon />
-          </button>
+          </SubmitButton>
         </form>
       </div>
 
@@ -41,7 +45,10 @@ export default function AdminSidebar({ name }: { name: string }) {
         <p className="mb-2 hidden px-3 text-xs font-semibold uppercase tracking-wider text-gray-400 md:block">
           Main menu
         </p>
-        <nav aria-label="Admin" className="flex gap-1 overflow-x-auto md:flex-col">
+        <nav
+          aria-label="Admin"
+          className="flex gap-1 overflow-x-auto md:flex-col"
+        >
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
@@ -50,7 +57,9 @@ export default function AdminSidebar({ name }: { name: string }) {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={`flex shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  active ? "bg-brand-600 text-white" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  active
+                    ? "bg-brand-600 text-white"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 }`}
               >
                 <Icon />
@@ -70,14 +79,13 @@ export default function AdminSidebar({ name }: { name: string }) {
           <p className="text-xs text-gray-500">Administrator</p>
         </div>
         <form action={logout} className="ml-auto">
-          <button
-            type="submit"
+          <SubmitButton
             aria-label="Log out"
             title="Log out"
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-900"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-200 hover:text-gray-900"
           >
             <LogoutIcon />
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </aside>

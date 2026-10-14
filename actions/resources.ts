@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth-guard";
+import { demoDelay } from "@/lib/demo-delay";
 import { resourceSchema, type ResourceInput } from "@/lib/validation";
 
 export type ResourceFormState =
@@ -46,6 +47,7 @@ export async function createResource(
   formData: FormData,
 ): Promise<ResourceFormState> {
   await requireAdmin();
+  await demoDelay();
   const { values, parsed } = readForm(formData);
   if (!parsed.success) {
     return {
@@ -73,6 +75,7 @@ export async function updateResource(
 ): Promise<ResourceFormState> {
   await requireAdmin();
   const id = z.uuid().parse(resourceId);
+  await demoDelay();
   const { values, parsed } = readForm(formData);
   if (!parsed.success) {
     return {
@@ -98,6 +101,7 @@ export async function setResourceActive(resourceId: string, isActive: boolean) {
     id: resourceId,
     isActive,
   });
+  await demoDelay();
 
   await db.resource.updateMany({ where: { id }, data: { isActive: active } });
   revalidatePath("/admin/resources");

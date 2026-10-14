@@ -7,6 +7,7 @@ import {
   updateResource,
   type ResourceFormState,
 } from "@/actions/resources";
+import SubmitButton from "@/components/submit-button";
 import { RESOURCE_TYPE_LABELS } from "@/lib/resource-types";
 
 const inputClass =
@@ -34,10 +35,10 @@ export default function ResourceForm({ resource }: ResourceFormProps) {
   const action = resource
     ? updateResource.bind(null, resource.id)
     : createResource;
-  const [state, formAction, pending] = useActionState<
-    ResourceFormState,
-    FormData
-  >(action, undefined);
+  const [state, formAction] = useActionState<ResourceFormState, FormData>(
+    action,
+    undefined,
+  );
 
   // After an error, show what the admin typed; else show saved values.
   const values = state?.values ?? {
@@ -155,13 +156,12 @@ export default function ResourceForm({ resource }: ResourceFormProps) {
         >
           Cancel
         </Link>
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        <SubmitButton
+          pendingText="Saving..."
+          className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         >
-          {pending ? "Saving..." : resource ? "Save changes" : "Add resource"}
-        </button>
+          {resource ? "Save changes" : "Add resource"}
+        </SubmitButton>
       </div>
     </form>
   );

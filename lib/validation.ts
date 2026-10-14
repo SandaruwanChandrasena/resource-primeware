@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ResourceType } from "@/generated/prisma/client";
+import { RESOURCE_SORTS } from "@/lib/resource-types";
 
 // Clean the email first, then check that it looks like an email.
 export const loginSchema = z.object({
@@ -42,3 +43,11 @@ export const resourceSchema = z.object({
 });
 
 export type ResourceInput = z.infer<typeof resourceSchema>;
+
+// URL filters for the resources list. Bad values fall back to defaults.
+export const resourceFilterSchema = z.object({
+  q: z.string().trim().max(80).catch(""),
+  type: z.enum(ResourceType).optional().catch(undefined),
+  status: z.enum(["active", "inactive"]).optional().catch(undefined),
+  sort: z.enum(RESOURCE_SORTS).catch("oldest"),
+});

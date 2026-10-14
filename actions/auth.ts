@@ -3,18 +3,26 @@
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { demoDelay } from "@/lib/demo-delay";
 import { createSession, deleteSession } from "@/lib/session";
 import { loginSchema } from "@/lib/validation";
 
 export type LoginState = { error?: string; email?: string } | undefined;
 
-export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
+export async function login(
+  _prev: LoginState,
+  formData: FormData,
+): Promise<LoginState> {
+  await demoDelay();
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0].message, email: String(formData.get("email") ?? "") };
+    return {
+      error: parsed.error.issues[0].message,
+      email: String(formData.get("email") ?? ""),
+    };
   }
 
   const { email, password } = parsed.data;
@@ -30,7 +38,10 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
 
   // Password was correct, so it is safe to say why (D39).
   if (!user.isActive) {
-    return { error: "Your account is disabled. Please contact the admin.", email };
+    return {
+      error: "Your account is disabled. Please contact the admin.",
+      email,
+    };
   }
 
   await createSession({ userId: user.id, role: user.role });
@@ -38,6 +49,7 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
 }
 
 export async function logout() {
+  await demoDelay();
   await deleteSession();
   redirect("/login");
 }
