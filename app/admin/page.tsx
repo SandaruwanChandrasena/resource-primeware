@@ -4,7 +4,6 @@ import {
   ResourcesIcon,
   UsersIcon,
 } from "@/components/layout/app-icons";
-import BookingCalendar from "@/components/booking/booking-calendar";
 import ChartToggles from "@/components/list-tools/chart-toggles";
 import BarChart from "@/components/ui/bar-chart";
 import ResourcePhoto from "@/components/ui/resource-photo";
@@ -61,8 +60,7 @@ export default async function AdminDashboardPage({
 }: AdminDashboardPageProps) {
   // Pages check again: layouts alone are not a security check.
   const user = await requireAdmin();
-  const query = await searchParams;
-  const { hide } = dashboardFilterSchema.parse(query);
+  const { hide } = dashboardFilterSchema.parse(await searchParams);
   const showBooked = !hide.includes("booked");
   const showCancelled = !hide.includes("cancelled");
   const now = new Date();
@@ -362,12 +360,6 @@ export default async function AdminDashboardPage({
           </p>
         )}
       </div>
-      {/* Same calendar as members: everyone's bookings at a glance. */}
-      <BookingCalendar
-        query={query}
-        basePath="/admin"
-        currentUserId={user.id}
-      />
     </section>
   );
 }

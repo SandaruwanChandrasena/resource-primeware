@@ -1,4 +1,8 @@
 import Link from "next/link";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@/components/layout/app-icons";
 import CalendarResourceFilter from "@/components/list-tools/calendar-resource-filter";
 import { CLOSE_TIME, OPEN_TIME } from "@/lib/config/booking-settings";
 import { db } from "@/lib/db";
@@ -17,26 +21,16 @@ import {
 } from "@/lib/utils/colombo-time";
 import { calendarFilterSchema } from "@/lib/validation";
 
-// One color per resource (same resource = same color everywhere). Full class names for Tailwind.
+// One solid color per resource (same resource = same color everywhere). Full class names for Tailwind.
 const CHIP_COLORS = [
-  "bg-blue-100 text-blue-900 border-blue-500",
-  "bg-emerald-100 text-emerald-900 border-emerald-500",
-  "bg-amber-100 text-amber-900 border-amber-500",
-  "bg-violet-100 text-violet-900 border-violet-500",
-  "bg-rose-100 text-rose-900 border-rose-500",
-  "bg-cyan-100 text-cyan-900 border-cyan-500",
-  "bg-lime-100 text-lime-900 border-lime-500",
-  "bg-fuchsia-100 text-fuchsia-900 border-fuchsia-500",
-];
-const DOT_COLORS = [
-  "bg-blue-500",
-  "bg-emerald-500",
-  "bg-amber-500",
-  "bg-violet-500",
-  "bg-rose-500",
-  "bg-cyan-500",
-  "bg-lime-500",
-  "bg-fuchsia-500",
+  "bg-blue-600",
+  "bg-emerald-600",
+  "bg-orange-600",
+  "bg-violet-600",
+  "bg-rose-600",
+  "bg-cyan-700",
+  "bg-lime-700",
+  "bg-fuchsia-600",
 ];
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -94,7 +88,7 @@ function EventTooltip({
   );
 }
 
-// Shared calendar of ALL confirmed bookings (member home + admin dashboard).
+// Shared calendar of ALL confirmed bookings (member home + admin Calendar page).
 export default async function BookingCalendar({
   query,
   basePath,
@@ -182,26 +176,28 @@ export default async function BookingCalendar({
     bookings.some((b) => b.resourceId === r.id),
   );
 
-  const navBtn =
-    "rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50";
   const chip = (e: CalendarEvent) =>
-    `group/ev relative flex w-full items-center gap-1 rounded border-l-4 px-1.5 text-left text-[11px] font-medium leading-5 hover:z-30 focus:z-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 ${CHIP_COLORS[e.color]}`;
+    `group/ev relative flex w-full items-center rounded-md px-2 py-0.5 text-left text-xs font-semibold leading-5 text-white shadow-sm hover:z-30 hover:brightness-110 focus:z-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1 ${CHIP_COLORS[e.color]}`;
+  const label = (e: CalendarEvent) =>
+    `${e.resourceName}, ${formatTime(e.start)} to ${formatTime(e.end)}, booked by ${e.userName}`;
+  const gridHeight = ((DAY_END - DAY_START) / 60) * HOUR_PX;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white">
-      {/* Toolbar: title, view switch, month/week arrows, resource filter. */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 p-4">
-        <div>
-          <h2 className="text-base font-semibold">Booking calendar</h2>
-          <p className="text-sm text-gray-500">
-            All confirmed bookings. Hover or tap a booking to see who booked it.
-          </p>
-        </div>
+    <div className="flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+      {/* Toolbar: big title left; filter, view switch, Today and arrows right. */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-xl font-bold tracking-tight tabular-nums">
+          {title}
+        </h2>
         <div className="flex flex-wrap items-center gap-2">
+          <CalendarResourceFilter
+            resources={resources}
+            value={resource ?? ""}
+          />
           <div
-            className="flex rounded-lg border border-gray-200 p-0.5"
             role="group"
             aria-label="Calendar view"
+            className="flex rounded-full bg-gray-100 p-1"
           >
             {(["month", "week"] as const).map((v) => (
               <Link
@@ -209,51 +205,45 @@ export default async function BookingCalendar({
                 href={href({ view: v === "month" ? undefined : v })}
                 aria-current={view === v ? "true" : undefined}
                 scroll={false}
-                className={`rounded-md px-3 py-1 text-sm font-medium ${view === v ? "bg-brand-600 text-white" : "text-gray-600 hover:bg-gray-100"}`}
+                className={`rounded-full px-4 py-1 text-sm font-medium transition-colors ${view === v ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
               >
                 {v === "month" ? "Month" : "Week"}
               </Link>
             ))}
           </div>
           <Link
-            href={href({ date: step(-1) })}
-            scroll={false}
-            className={navBtn}
-            aria-label="Previous"
-          >
-            ←
-          </Link>
-          <Link
             href={href({ date: undefined })}
             scroll={false}
-            className={navBtn}
+            className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             Today
           </Link>
           <Link
+            href={href({ date: step(-1) })}
+            scroll={false}
+            aria-label={view === "month" ? "Previous month" : "Previous week"}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100"
+          >
+            <ChevronLeftIcon className="h-4 w-4" />
+          </Link>
+          <Link
             href={href({ date: step(1) })}
             scroll={false}
-            className={navBtn}
-            aria-label="Next"
+            aria-label={view === "month" ? "Next month" : "Next week"}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100"
           >
-            →
+            <ChevronRightIcon className="h-4 w-4" />
           </Link>
-          <span className="min-w-36 px-1 text-sm font-semibold tabular-nums">
-            {title}
-          </span>
-          <CalendarResourceFilter
-            resources={resources}
-            value={resource ?? ""}
-          />
         </div>
       </div>
 
       {view === "month" ? (
-        <div className="grid grid-cols-7">
-          {WEEKDAYS.map((w) => (
+        // No overflow-hidden: the hover boxes must be able to go outside a day.
+        <div className="grid grid-cols-7 rounded-xl border border-gray-200">
+          {WEEKDAYS.map((w, i) => (
             <div
               key={w}
-              className="border-b border-gray-200 bg-gray-50 px-2 py-2 text-center text-xs font-semibold uppercase tracking-wider text-gray-500"
+              className={`border-b border-gray-200 bg-gray-100 py-2.5 text-center text-xs font-semibold sm:text-sm ${i ? "border-l" : "rounded-tl-xl"} ${i === 6 ? "rounded-tr-xl text-red-600" : "text-gray-600"}`}
             >
               {w}
             </div>
@@ -262,14 +252,16 @@ export default async function BookingCalendar({
             const list = eventsByDay.get(d) ?? [];
             const inMonth = d.slice(0, 7) === monthStart.slice(0, 7);
             const isToday = d === today;
+            const isSunday = i % 7 === 6;
+            const lastRow = i >= days.length - 7;
             return (
               <div
                 key={d}
-                className={`min-h-24 border-b border-gray-100 p-1 sm:min-h-28 sm:p-1.5 ${i % 7 ? "border-l" : ""} ${d < today ? "bg-gray-50/70" : ""}`}
+                className={`relative min-h-24 p-1 sm:min-h-28 sm:p-1.5 ${i % 7 ? "border-l border-gray-200" : ""} ${lastRow ? "" : "border-b border-gray-200"} ${inMonth ? "bg-white" : "bg-gray-100/70"} ${isToday ? "z-10 bg-brand-50 ring-2 ring-inset ring-brand-600" : ""} ${lastRow && i % 7 === 0 ? "rounded-bl-xl" : ""} ${lastRow && isSunday ? "rounded-br-xl" : ""}`}
               >
-                <div className="mb-1 flex justify-end">
+                <div className="mb-1.5 flex justify-center">
                   <span
-                    className={`flex h-6 w-6 items-center justify-center rounded-full text-xs tabular-nums ${isToday ? "bg-brand-600 font-semibold text-white" : inMonth ? "text-gray-700" : "text-gray-300"}`}
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-sm tabular-nums ${isToday ? "bg-brand-600 font-semibold text-white" : !inMonth ? "text-gray-400" : isSunday ? "font-medium text-red-600" : "font-medium text-gray-800"}`}
                   >
                     {Number(d.slice(8))}
                   </span>
@@ -280,14 +272,14 @@ export default async function BookingCalendar({
                       key={e.id}
                       type="button"
                       className={chip(e)}
-                      aria-label={`${e.resourceName}, ${formatTime(e.start)} to ${formatTime(e.end)}, booked by ${e.userName}`}
+                      aria-label={label(e)}
                     >
-                      {/* Phones: just a colored bar. Bigger screens: time + resource. */}
+                      {/* Phones: a thin colored bar. Bigger screens: time + resource. */}
                       <span className="hidden truncate sm:inline">
                         {e.isMine && "★ "}
                         {formatTime(e.start)} {e.resourceName}
                       </span>
-                      <span className="h-1.5 sm:hidden" />
+                      <span className="h-1 sm:hidden" />
                       <EventTooltip event={e} alignRight={i % 7 >= 4} />
                     </button>
                   ))}
@@ -296,7 +288,7 @@ export default async function BookingCalendar({
                     <Link
                       href={href({ view: "week", date: d })}
                       scroll={false}
-                      className="px-1 text-[11px] font-medium text-brand-700 hover:underline"
+                      className="px-1 text-xs font-medium text-gray-600 hover:text-brand-700 hover:underline"
                     >
                       +{list.length - MAX_CHIPS} more
                     </Link>
@@ -307,27 +299,31 @@ export default async function BookingCalendar({
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-[2.5rem_repeat(7,minmax(0,1fr))] sm:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]">
-          <div className="border-b border-gray-200 bg-gray-50" />
-          {days.map((d) => (
-            <div
-              key={d}
-              className={`border-b border-l border-gray-200 bg-gray-50 px-1 py-2 text-center text-xs font-semibold ${d === today ? "text-brand-700" : "text-gray-500"}`}
-            >
-              <span className="hidden sm:inline">{formatPlainDay(d)}</span>
-              <span className="sm:hidden">{Number(d.slice(8))}</span>
-            </div>
-          ))}
+        <div className="grid grid-cols-[2.5rem_repeat(7,minmax(0,1fr))] rounded-xl border border-gray-200 sm:grid-cols-[3.5rem_repeat(7,minmax(0,1fr))]">
+          <div className="rounded-tl-xl border-b border-gray-200 bg-gray-100" />
+          {days.map((d, i) => {
+            const isToday = d === today;
+            return (
+              <div
+                key={d}
+                className={`flex flex-col items-center gap-0.5 border-b border-l border-gray-200 bg-gray-100 py-2 text-xs font-semibold sm:text-sm ${i === 6 ? "rounded-tr-xl text-red-600" : "text-gray-600"}`}
+              >
+                <span>{WEEKDAYS[i]}</span>
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-full tabular-nums ${isToday ? "bg-brand-600 text-white" : ""}`}
+                >
+                  {Number(d.slice(8))}
+                </span>
+              </div>
+            );
+          })}
 
           {/* Hour labels on the left. */}
-          <div
-            className="relative"
-            style={{ height: ((DAY_END - DAY_START) / 60) * HOUR_PX }}
-          >
+          <div className="relative" style={{ height: gridHeight }}>
             {Array.from({ length: (DAY_END - DAY_START) / 60 }, (_, h) => (
               <span
                 key={h}
-                className="absolute right-1 -translate-y-1/2 text-[10px] tabular-nums text-gray-400 first:translate-y-0 sm:text-xs"
+                className="absolute right-1.5 mt-1 text-[10px] tabular-nums text-gray-400 sm:text-xs"
                 style={{ top: h * HOUR_PX }}
               >
                 {String(DAY_START / 60 + h).padStart(2, "0")}:00
@@ -351,11 +347,11 @@ export default async function BookingCalendar({
             return (
               <div
                 key={d}
-                className={`relative border-l border-gray-200 ${d < today ? "bg-gray-50/70" : ""} ${d === today ? "bg-brand-50/40" : ""}`}
+                className={`relative border-l border-gray-200 ${d === today ? "bg-brand-50" : d < today ? "bg-gray-100/50" : ""}`}
                 style={{
-                  height: ((DAY_END - DAY_START) / 60) * HOUR_PX,
+                  height: gridHeight,
                   backgroundImage:
-                    "linear-gradient(to bottom, #f3f4f6 1px, transparent 1px)",
+                    "linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)",
                   backgroundSize: `100% ${HOUR_PX}px`,
                 }}
               >
@@ -363,12 +359,13 @@ export default async function BookingCalendar({
                   <button
                     key={e.id}
                     type="button"
-                    aria-label={`${e.resourceName}, ${formatTime(e.start)} to ${formatTime(e.end)}, booked by ${e.userName}`}
-                    className={`group/ev absolute overflow-visible rounded border-l-4 px-1 py-0.5 text-left text-[11px] font-medium leading-tight hover:z-30 focus:z-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 ${CHIP_COLORS[e.color]}`}
+                    aria-label={label(e)}
+                    className={`group/ev absolute rounded-md px-1.5 py-1 text-left text-xs font-semibold leading-tight text-white shadow-sm hover:z-30 hover:brightness-110 focus:z-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1 ${CHIP_COLORS[e.color]}`}
                     style={{
                       top:
                         ((Math.max(from, DAY_START) - DAY_START) / 60) *
-                        HOUR_PX,
+                          HOUR_PX +
+                        1,
                       height: Math.max(
                         18,
                         ((Math.min(to, DAY_END) - Math.max(from, DAY_START)) /
@@ -382,9 +379,9 @@ export default async function BookingCalendar({
                   >
                     <span className="hidden truncate sm:block">
                       {e.isMine && "★ "}
-                      {formatTime(e.start)}
+                      {formatTime(e.start)}–{formatTime(e.end)}
                     </span>
-                    <span className="hidden truncate sm:block">
+                    <span className="hidden truncate font-medium opacity-90 sm:block">
                       {e.resourceName}
                     </span>
                     <EventTooltip event={e} alignRight={col >= 4} />
@@ -396,21 +393,23 @@ export default async function BookingCalendar({
         </div>
       )}
 
-      {/* Color key + empty note. */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-xs text-gray-600">
+      {/* Color key (one dot per resource on screen) + empty note. */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-600">
         {shown.length === 0 ? (
           <span>No bookings in this {view}.</span>
         ) : (
           shown.map((r) => (
-            <span key={r.id} className="flex items-center gap-1.5">
+            <span key={r.id} className="flex items-center gap-2">
               <span
-                className={`h-2.5 w-2.5 rounded-full ${DOT_COLORS[colorOf.get(r.id) ?? 0]}`}
+                className={`h-3 w-3 rounded-full ${CHIP_COLORS[colorOf.get(r.id) ?? 0]}`}
               />
               {r.name}
             </span>
           ))
         )}
-        <span className="ml-auto text-gray-500">★ = your booking</span>
+        <span className="ml-auto text-gray-500">
+          ★ = your booking · Hover or tap a booking for details
+        </span>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import NotificationBell from "@/components/layout/notification-bell";
 import ProfileLink, { AVATAR_GLOW } from "@/components/layout/profile-link";
 import {
   BookingsIcon,
+  CalendarIcon,
   DashboardIcon,
   LogoutIcon,
   ResourcesIcon,
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: DashboardIcon },
   { href: "/admin/resources", label: "Resources", icon: ResourcesIcon },
   { href: "/admin/bookings", label: "Bookings", icon: BookingsIcon },
+  { href: "/admin/calendar", label: "Calendar", icon: CalendarIcon },
   { href: "/admin/users", label: "Users", icon: UsersIcon },
 ];
 
