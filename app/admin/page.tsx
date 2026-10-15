@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   BookingsIcon,
+  CalendarIcon,
   ResourcesIcon,
   UsersIcon,
 } from "@/components/layout/app-icons";
@@ -158,52 +159,67 @@ export default async function AdminDashboardPage({
 
   return (
     <section className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Admin dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Welcome back, {user.name}. Today is {formatLongDate(now)}.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Welcome back, {user.name}
+          </p>
+        </div>
+        {/* Today's date as a small pill on the right. */}
+        <span className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700">
+          <CalendarIcon className="h-4 w-4 text-brand-600" />
+          {formatLongDate(now)}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           label="Bookings today"
           value={todayCount}
-          hint="View all bookings"
+          hint="View all"
           href="/admin/bookings"
           icon={BookingsIcon}
+          tone="blue"
         />
         <StatCard
-          label="Bookings this week"
+          label="This week"
           value={weekCount}
           hint="Monday to Sunday"
           href="/admin/bookings"
-          icon={BookingsIcon}
+          icon={CalendarIcon}
+          tone="violet"
         />
         <StatCard
           label="Active resources"
           value={resourceCount}
-          hint="Manage resources"
+          hint="Manage"
           href="/admin/resources?status=active"
           icon={ResourcesIcon}
+          tone="emerald"
         />
         <StatCard
           label="Active users"
           value={userCount}
-          hint="Manage users"
+          hint="Manage"
           href="/admin/users?status=active"
           icon={UsersIcon}
+          tone="amber"
         />
       </div>
 
       <div className="flex flex-col gap-4">
-        <ChartToggles
-          charts={[
-            { value: "booked", label: "Most booked" },
-            { value: "cancelled", label: "Most cancelled" },
-          ]}
-          hidden={hide}
-        />
+        {/* Section title left, show/hide chips right. */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold tracking-tight">Usage</h2>
+          <ChartToggles
+            charts={[
+              { value: "booked", label: "Most booked" },
+              { value: "cancelled", label: "Most cancelled" },
+            ]}
+            hidden={hide}
+          />
+        </div>
         {(showBooked || showCancelled) && (
           // Side by side on big screens when both are shown.
           <div
@@ -211,8 +227,9 @@ export default async function AdminDashboardPage({
           >
             {showBooked && (
               <BarChart
-                title="Most booked resources"
-                description={`Hours booked, ${chartPeriod}. Cancelled bookings are not counted.`}
+                title="Most booked"
+                badge="Hours · ±30 days"
+                info={`Hours booked, ${chartPeriod}. Cancelled bookings are not counted.`}
                 tone="brand"
                 emptyText="No bookings in this period yet."
                 rows={topResources.map((r) => ({
@@ -227,8 +244,9 @@ export default async function AdminDashboardPage({
             )}
             {showCancelled && (
               <BarChart
-                title="Most cancelled resources"
-                description={`Cancelled bookings, ${chartPeriod}. The % is out of all bookings.`}
+                title="Most cancelled"
+                badge="Count · rate"
+                info={`Cancelled bookings, ${chartPeriod}. The % is out of all bookings.`}
                 tone="red"
                 emptyText="No cancelled bookings in this period."
                 rows={cancelledResources.map((r) => {

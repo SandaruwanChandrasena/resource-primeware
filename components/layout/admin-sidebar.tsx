@@ -20,9 +20,9 @@ import UserAvatar from "@/components/ui/user-avatar";
 // Add one line here when a new admin page is built (D48).
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: DashboardIcon },
+  { href: "/admin/calendar", label: "Calendar", icon: CalendarIcon },
   { href: "/admin/resources", label: "Resources", icon: ResourcesIcon },
   { href: "/admin/bookings", label: "Bookings", icon: BookingsIcon },
-  { href: "/admin/calendar", label: "Calendar", icon: CalendarIcon },
   { href: "/admin/users", label: "Users", icon: UsersIcon },
 ];
 
@@ -38,8 +38,8 @@ export default function AdminSidebar({ name, imageName }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="relative z-20 flex flex-col gap-3 border-b border-gray-200 bg-white p-3 md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:gap-6 md:border-b-0 md:border-r md:p-4">
-      <div className="flex items-center justify-between">
+    <aside className="relative z-20 flex flex-col gap-3 border-b border-gray-200 bg-white p-3 md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:gap-5 md:border-b-0 md:border-r md:p-4">
+      <div className="flex items-center justify-between md:border-b md:border-gray-100 md:px-1 md:pb-4">
         <AppLogo href="/admin" />
         <div className="flex items-center gap-2">
           {/* Bell on every screen size; z-20 on the sidebar keeps its list on top. */}
@@ -65,8 +65,8 @@ export default function AdminSidebar({ name, imageName }: AdminSidebarProps) {
       </div>
 
       <div>
-        <p className="mb-2 hidden px-3 text-xs font-semibold uppercase tracking-wider text-gray-400 md:block">
-          Main menu
+        <p className="mb-2 hidden px-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400 md:block">
+          Menu
         </p>
         <nav
           aria-label="Admin"
@@ -81,11 +81,14 @@ export default function AdminSidebar({ name, imageName }: AdminSidebarProps) {
                 aria-current={active ? "page" : undefined}
                 className={`flex shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   active
-                    ? "bg-brand-600 text-white"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-brand-50 text-brand-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                <Icon />
+                {/* Active item: soft blue, icon in brand blue. */}
+                <Icon
+                  className={`h-5 w-5 ${active ? "text-brand-600" : "text-gray-400"}`}
+                />
                 {label}
               </Link>
             );
@@ -93,7 +96,7 @@ export default function AdminSidebar({ name, imageName }: AdminSidebarProps) {
         </nav>
       </div>
 
-      <div className="mt-auto hidden items-center gap-3 rounded-xl bg-gray-50 p-3 md:flex">
+      <div className="mt-auto hidden items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 md:flex">
         {/* The name is already shown here, so the avatar only glows. */}
         <Link
           href="/admin/profile"
@@ -110,7 +113,7 @@ export default function AdminSidebar({ name, imageName }: AdminSidebarProps) {
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{name}</span>
             <span className="block text-xs text-gray-500 group-hover:text-brand-700">
-              Administrator · My profile
+              Administrator
             </span>
           </span>
         </Link>

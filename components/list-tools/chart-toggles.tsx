@@ -6,7 +6,7 @@ import { useUrlQuery } from "@/lib/utils/url-query";
 type ChartToggle = { value: string; label: string };
 type ChartTogglesProps = { charts: ChartToggle[]; hidden: string[] };
 
-// Checkboxes to show or hide dashboard charts. Hidden ones live in the URL (D54).
+// Chips to show or hide dashboard charts. Hidden ones live in the URL (D54).
 export default function ChartToggles({ charts, hidden }: ChartTogglesProps) {
   const { update } = useUrlQuery();
   // Local copy, so the tick changes at once (the page reloads after).
@@ -20,23 +20,31 @@ export default function ChartToggles({ charts, hidden }: ChartTogglesProps) {
   }
 
   return (
-    <fieldset className="flex flex-wrap items-center gap-x-5 gap-y-2">
+    <fieldset className="flex flex-wrap items-center gap-2">
       <legend className="sr-only">Charts to show</legend>
-      <span className="text-sm font-medium text-gray-700">Show charts:</span>
-      {charts.map((c) => (
-        <label
-          key={c.value}
-          className="flex cursor-pointer items-center gap-2 text-sm text-gray-700"
-        >
-          <input
-            type="checkbox"
-            checked={!off.includes(c.value)}
-            onChange={(e) => toggle(c.value, e.target.checked)}
-            className="h-4 w-4 accent-brand-600"
-          />
-          {c.label}
-        </label>
-      ))}
+      {charts.map((c) => {
+        const on = !off.includes(c.value);
+        return (
+          // Real checkbox stays (keyboard + screen readers); the chip is its look.
+          <label
+            key={c.value}
+            className={`flex cursor-pointer select-none items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-600 ${
+              on
+                ? "border-brand-100 bg-brand-50 text-brand-700"
+                : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={on}
+              onChange={(e) => toggle(c.value, e.target.checked)}
+              className="sr-only"
+            />
+            <span aria-hidden="true">{on ? "✓" : "+"}</span>
+            {c.label}
+          </label>
+        );
+      })}
     </fieldset>
   );
 }
