@@ -79,3 +79,11 @@ export function formatDuration(minutes: number) {
   const minText = rest ? `${rest} min` : "";
   return [hourText, minText].filter(Boolean).join(" ");
 }
+
+// Monday of this week in Sri Lanka, e.g. "2026-10-12" (weeks are Mon–Sun).
+export function weekStartInColombo() {
+  const today = todayInColombo();
+  // getUTCDay on the plain date: 0 = Sunday ... 6 = Saturday.
+  const weekday = new Date(`${today}T00:00:00Z`).getUTCDay();
+  return addDays(today, -((weekday + 6) % 7));
+}
