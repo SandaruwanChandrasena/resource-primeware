@@ -32,7 +32,10 @@ export default function MemberNavbar({ name, imageName }: MemberNavbarProps) {
       <div className="mx-auto flex h-16 max-w-[96rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <AppLogo href="/member" hideTextOnMobile />
 
-        <nav aria-label="Member" className="flex gap-1 overflow-x-auto">
+        <nav
+          aria-label="Member"
+          className="flex gap-1 overflow-x-auto sm:gap-4 lg:gap-10"
+        >
           {NAV_ITEMS.map(({ href, label }) => {
             const active = isActive(pathname, href);
             return (
@@ -40,7 +43,7 @@ export default function MemberNavbar({ name, imageName }: MemberNavbarProps) {
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:px-5 ${
                   active
                     ? "bg-brand-50 text-brand-700"
                     : "text-gray-600 hover:bg-white/70 hover:text-gray-900"
