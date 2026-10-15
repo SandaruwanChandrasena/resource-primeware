@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
 import AppLogo from "@/components/layout/app-logo";
+import NotificationBell from "@/components/layout/notification-bell";
 import ProfileLink, { AVATAR_GLOW } from "@/components/layout/profile-link";
 import {
   DashboardIcon,
@@ -33,25 +34,29 @@ export default function AdminSidebar({ name, imageName }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex flex-col gap-3 border-b border-gray-200 bg-white p-3 md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:gap-6 md:border-b-0 md:border-r md:p-4">
+    <aside className="relative z-20 flex flex-col gap-3 border-b border-gray-200 bg-white p-3 md:sticky md:top-0 md:h-screen md:w-60 md:shrink-0 md:gap-6 md:border-b-0 md:border-r md:p-4">
       <div className="flex items-center justify-between">
         <AppLogo href="/admin" />
-        {/* Phones: avatar + log out in the top bar. */}
-        <div className="flex items-center gap-2 md:hidden">
-          <ProfileLink
-            name={name}
-            imageName={imageName}
-            href="/admin/profile"
-            active={pathname === "/admin/profile"}
-          />
-          <form action={logout}>
-            <SubmitButton
-              aria-label="Log out"
-              className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-900 text-white transition-colors hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:opacity-60"
-            >
-              <LogoutIcon />
-            </SubmitButton>
-          </form>
+        <div className="flex items-center gap-2">
+          {/* Bell on every screen size; z-20 on the sidebar keeps its list on top. */}
+          <NotificationBell placement="sidebar" />
+          {/* Phones: avatar + log out in the top bar. */}
+          <div className="flex items-center gap-2 md:hidden">
+            <ProfileLink
+              name={name}
+              imageName={imageName}
+              href="/admin/profile"
+              active={pathname === "/admin/profile"}
+            />
+            <form action={logout}>
+              <SubmitButton
+                aria-label="Log out"
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-900 text-white transition-colors hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:opacity-60"
+              >
+                <LogoutIcon />
+              </SubmitButton>
+            </form>
+          </div>
         </div>
       </div>
 

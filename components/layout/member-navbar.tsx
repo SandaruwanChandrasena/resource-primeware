@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { logout } from "@/actions/auth";
 import AppLogo from "@/components/layout/app-logo";
 import { LogoutIcon } from "@/components/layout/app-icons";
+import NotificationBell from "@/components/layout/notification-bell";
 import ProfileLink from "@/components/layout/profile-link";
 import SubmitButton from "@/components/ui/submit-button";
 
@@ -52,6 +53,7 @@ export default function MemberNavbar({ name, imageName }: MemberNavbarProps) {
         </nav>
 
         <div className="flex items-center gap-3">
+          <NotificationBell />
           <ProfileLink
             name={name}
             imageName={imageName}
