@@ -21,17 +21,32 @@ import {
 } from "@/lib/utils/colombo-time";
 import { calendarFilterSchema } from "@/lib/validation";
 
-// One solid color per resource (same resource = same color everywhere). Full class names for Tailwind.
+// One soft color per resource (same resource = same color everywhere). Full class names for Tailwind.
+// chip = light background + colored left bar + dark text; dot = color key.
 const CHIP_COLORS = [
-  "bg-blue-600",
-  "bg-emerald-600",
-  "bg-orange-600",
-  "bg-violet-600",
-  "bg-rose-600",
-  "bg-cyan-700",
-  "bg-lime-700",
-  "bg-fuchsia-600",
+  { chip: "bg-blue-100 border-blue-500 text-blue-900", dot: "bg-blue-500" },
+  {
+    chip: "bg-emerald-100 border-emerald-500 text-emerald-900",
+    dot: "bg-emerald-500",
+  },
+  {
+    chip: "bg-orange-100 border-orange-500 text-orange-900",
+    dot: "bg-orange-500",
+  },
+  {
+    chip: "bg-violet-100 border-violet-500 text-violet-900",
+    dot: "bg-violet-500",
+  },
+  { chip: "bg-rose-100 border-rose-500 text-rose-900", dot: "bg-rose-500" },
+  { chip: "bg-cyan-100 border-cyan-500 text-cyan-900", dot: "bg-cyan-500" },
+  { chip: "bg-lime-100 border-lime-600 text-lime-900", dot: "bg-lime-600" },
+  {
+    chip: "bg-fuchsia-100 border-fuchsia-500 text-fuchsia-900",
+    dot: "bg-fuchsia-500",
+  },
 ];
+// Week view: a booking shorter than this (px) shows one line only.
+const TWO_LINE_PX = 40;
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MAX_CHIPS = 3;
@@ -177,7 +192,7 @@ export default async function BookingCalendar({
   );
 
   const chip = (e: CalendarEvent) =>
-    `group/ev relative flex w-full items-center rounded-md px-2 py-0.5 text-left text-xs font-semibold leading-5 text-white shadow-sm hover:z-30 hover:brightness-110 focus:z-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1 ${CHIP_COLORS[e.color]}`;
+    `group/ev relative flex w-full items-center rounded-md border-l-[3px] px-2 py-0.5 text-left text-xs font-semibold leading-5 hover:z-30 hover:brightness-95 focus:z-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1 ${CHIP_COLORS[e.color].chip}`;
   const label = (e: CalendarEvent) =>
     `${e.resourceName}, ${formatTime(e.start)} to ${formatTime(e.end)}, booked by ${e.userName}`;
   const gridHeight = ((DAY_END - DAY_START) / 60) * HOUR_PX;
@@ -355,38 +370,46 @@ export default async function BookingCalendar({
                   backgroundSize: `100% ${HOUR_PX}px`,
                 }}
               >
-                {placed.map(({ e, from, to, lane }) => (
-                  <button
-                    key={e.id}
-                    type="button"
-                    aria-label={label(e)}
-                    className={`group/ev absolute rounded-md px-1.5 py-1 text-left text-xs font-semibold leading-tight text-white shadow-sm hover:z-30 hover:brightness-110 focus:z-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1 ${CHIP_COLORS[e.color]}`}
-                    style={{
-                      top:
-                        ((Math.max(from, DAY_START) - DAY_START) / 60) *
-                          HOUR_PX +
-                        1,
-                      height: Math.max(
-                        18,
-                        ((Math.min(to, DAY_END) - Math.max(from, DAY_START)) /
-                          60) *
-                          HOUR_PX -
-                          2,
-                      ),
-                      left: `calc(${(lane / lanes) * 100}% + 2px)`,
-                      width: `calc(${100 / lanes}% - 4px)`,
-                    }}
-                  >
-                    <span className="hidden truncate sm:block">
-                      {e.isMine && "★ "}
-                      {formatTime(e.start)}–{formatTime(e.end)}
-                    </span>
-                    <span className="hidden truncate font-medium opacity-90 sm:block">
-                      {e.resourceName}
-                    </span>
-                    <EventTooltip event={e} alignRight={col >= 4} />
-                  </button>
-                ))}
+                {placed.map(({ e, from, to, lane }) => {
+                  const height = Math.max(
+                    18,
+                    ((Math.min(to, DAY_END) - Math.max(from, DAY_START)) / 60) *
+                      HOUR_PX -
+                      2,
+                  );
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      aria-label={label(e)}
+                      className={`group/ev absolute rounded-md border-l-[3px] text-left text-xs font-semibold leading-tight hover:z-30 hover:brightness-95 focus:z-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-1 ${CHIP_COLORS[e.color].chip}`}
+                      style={{
+                        top:
+                          ((Math.max(from, DAY_START) - DAY_START) / 60) *
+                            HOUR_PX +
+                          1,
+                        height,
+                        left: `calc(${(lane / lanes) * 100}% + 2px)`,
+                        width: `calc(${100 / lanes}% - 4px)`,
+                      }}
+                    >
+                      {/* Text is clipped INSIDE the chip; the hover box stays outside the clip. */}
+                      <span className="hidden h-full overflow-hidden px-1.5 py-1 sm:block">
+                        <span className="block truncate">
+                          {e.isMine && "★ "}
+                          {e.resourceName}
+                        </span>
+                        {/* Short bookings: name only; the time is in the hover box. */}
+                        {height >= TWO_LINE_PX && (
+                          <span className="block truncate font-normal opacity-80">
+                            {formatTime(e.start)}–{formatTime(e.end)}
+                          </span>
+                        )}
+                      </span>
+                      <EventTooltip event={e} alignRight={col >= 4} />
+                    </button>
+                  );
+                })}
               </div>
             );
           })}
@@ -401,7 +424,7 @@ export default async function BookingCalendar({
           shown.map((r) => (
             <span key={r.id} className="flex items-center gap-2">
               <span
-                className={`h-3 w-3 rounded-full ${CHIP_COLORS[colorOf.get(r.id) ?? 0]}`}
+                className={`h-3 w-3 rounded-full ${CHIP_COLORS[colorOf.get(r.id) ?? 0].dot}`}
               />
               {r.name}
             </span>
