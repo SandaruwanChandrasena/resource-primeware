@@ -4,9 +4,11 @@ import {
   ResourcesIcon,
   UsersIcon,
 } from "@/components/layout/app-icons";
+import BookingCalendar from "@/components/booking/booking-calendar";
 import ChartToggles from "@/components/list-tools/chart-toggles";
 import BarChart from "@/components/ui/bar-chart";
 import ResourcePhoto from "@/components/ui/resource-photo";
+import StatCard from "@/components/ui/stat-card";
 import StatusPill from "@/components/ui/status-pill";
 import UserAvatar from "@/components/ui/user-avatar";
 import { MAX_DAYS_AHEAD } from "@/lib/config/booking-settings";
@@ -50,37 +52,6 @@ function formatHours(hours: number) {
   return `${Number(hours.toFixed(1))} h`;
 }
 
-type StatCardProps = {
-  label: string;
-  value: number;
-  hint: string;
-  href: string;
-  icon: (props: { className?: string }) => React.ReactNode;
-};
-
-// One number card. The whole card is a link to the details.
-function StatCard({ label, value, hint, href, icon: Icon }: StatCardProps) {
-  return (
-    <Link
-      href={href}
-      className="group flex items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-5 transition-colors hover:border-brand-600/40 hover:bg-brand-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
-    >
-      <div>
-        <p className="text-sm font-medium text-gray-500">{label}</p>
-        <p className="mt-2 text-3xl font-bold tabular-nums tracking-tight">
-          {value}
-        </p>
-        <p className="mt-1 text-xs text-gray-500 group-hover:text-brand-700">
-          {hint}
-        </p>
-      </div>
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
-        <Icon className="h-5 w-5" />
-      </span>
-    </Link>
-  );
-}
-
 type AdminDashboardPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -90,7 +61,8 @@ export default async function AdminDashboardPage({
 }: AdminDashboardPageProps) {
   // Pages check again: layouts alone are not a security check.
   const user = await requireAdmin();
-  const { hide } = dashboardFilterSchema.parse(await searchParams);
+  const query = await searchParams;
+  const { hide } = dashboardFilterSchema.parse(query);
   const showBooked = !hide.includes("booked");
   const showCancelled = !hide.includes("cancelled");
   const now = new Date();
@@ -390,6 +362,12 @@ export default async function AdminDashboardPage({
           </p>
         )}
       </div>
+      {/* Same calendar as members: everyone's bookings at a glance. */}
+      <BookingCalendar
+        query={query}
+        basePath="/admin"
+        currentUserId={user.id}
+      />
     </section>
   );
 }

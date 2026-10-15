@@ -80,10 +80,47 @@ export function formatDuration(minutes: number) {
   return [hourText, minText].filter(Boolean).join(" ");
 }
 
-// Monday of this week in Sri Lanka, e.g. "2026-10-12" (weeks are Mon–Sun).
-export function weekStartInColombo() {
-  const today = todayInColombo();
+// Monday of the week of a plain date, e.g. "2026-10-15" -> "2026-10-12".
+export function mondayOf(date: string) {
   // getUTCDay on the plain date: 0 = Sunday ... 6 = Saturday.
-  const weekday = new Date(`${today}T00:00:00Z`).getUTCDay();
-  return addDays(today, -((weekday + 6) % 7));
+  const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
+  return addDays(date, -((weekday + 6) % 7));
+}
+
+// Monday of this week in Sri Lanka (weeks are Mon–Sun).
+export function weekStartInColombo() {
+  return mondayOf(todayInColombo());
+}
+
+// "2026-10-15" + 1 month -> "2026-11-01" (always the 1st of the month).
+export function addMonths(date: string, months: number) {
+  const d = new Date(`${date.slice(0, 7)}-01T00:00:00Z`);
+  d.setUTCMonth(d.getUTCMonth() + months);
+  return d.toISOString().slice(0, 10);
+}
+
+// Minutes after midnight in Sri Lanka, e.g. 10:30 -> 630 (for the week view).
+export function minutesInColombo(date: Date) {
+  const [h, m] = clock.format(date).split(":").map(Number);
+  return h * 60 + m;
+}
+
+const monthTitle = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "UTC",
+  month: "long",
+  year: "numeric",
+});
+const plainDay = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "UTC",
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+});
+
+// Plain date labels (no time zone shift): "October 2026" and "Mon 12 Oct".
+export function formatMonthTitle(date: string) {
+  return monthTitle.format(new Date(`${date}T00:00:00Z`));
+}
+export function formatPlainDay(date: string) {
+  return plainDay.format(new Date(`${date}T00:00:00Z`));
 }

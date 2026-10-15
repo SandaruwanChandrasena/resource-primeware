@@ -239,3 +239,10 @@ export const dashboardFilterSchema = z.object({
       DASHBOARD_CHARTS.filter((chart) => text.split(",").includes(chart)),
     ),
 });
+
+// Booking calendar in the URL: ?view=week&date=2026-10-15&resource=<id>.
+export const calendarFilterSchema = z.object({
+  view: z.enum(["month", "week"]).catch("month"),
+  date: z.iso.date().optional().catch(undefined),
+  resource: z.uuid().optional().catch(undefined),
+});
