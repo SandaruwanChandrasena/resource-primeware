@@ -92,6 +92,7 @@ export async function cancelBookingByAdmin(
   const parsed = adminCancelSchema.safeParse({
     reservationId: formData.get("reservationId"),
     reason: formData.get("reason"),
+    keepBlocked: formData.get("keepBlocked"),
   });
   if (!parsed.success)
     return { ok: false, error: parsed.error.issues[0].message };
@@ -101,6 +102,7 @@ export async function cancelBookingByAdmin(
     parsed.data.reservationId,
     admin.id,
     parsed.data.reason,
+    parsed.data.keepBlocked,
   );
   if (!result.ok) return { ok: false, error: result.error };
 

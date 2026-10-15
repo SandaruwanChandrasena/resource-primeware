@@ -212,8 +212,10 @@ export const adminBookingsFilterSchema = z.object({
 });
 
 // Admin cancel. The service decides if the reason is needed (D29).
+// A ticked checkbox sends "on"; not ticked sends nothing.
 export const adminCancelSchema = z.object({
   reservationId: z.uuid("This booking no longer exists."),
+  keepBlocked: z.preprocess((v) => v === "on", z.boolean()),
   reason: z.preprocess(
     emptyToNull,
     z

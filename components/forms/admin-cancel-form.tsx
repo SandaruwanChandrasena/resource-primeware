@@ -55,6 +55,7 @@ export default function AdminCancelForm({
     undefined,
   );
   const [length, setLength] = useState(0);
+  const [keepBlocked, setKeepBlocked] = useState(true);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const reasonId = useId();
@@ -88,8 +89,10 @@ export default function AdminCancelForm({
             Cancel this booking?
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            {summary}. Booked by {ownerName}. People on the &quot;Notify
-            me&quot; list will be told the time is free.
+            {summary}. Booked by {ownerName}.
+            {/* Own block: cancelling it frees the time. */}
+            {!reasonRequired &&
+              ' The time becomes free. People on the "Notify me" list are told.'}
           </p>
 
           <label
@@ -112,6 +115,35 @@ export default function AdminCancelForm({
           <p className="mt-1 text-right text-xs tabular-nums text-gray-500">
             {length}/200
           </p>
+
+          {/* Only for someone else's booking (D81). Ticked by default. */}
+          {reasonRequired && (
+            <label className="mt-3 flex items-start gap-2 rounded-lg bg-gray-50 p-3 text-sm">
+              <input
+                type="checkbox"
+                name="keepBlocked"
+                checked={keepBlocked}
+                onChange={(e) => setKeepBlocked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-brand-600"
+              />
+              <span>
+                <span className="font-medium text-gray-900">
+                  Keep this time blocked for admin use
+                </span>
+                <span className="block text-xs text-gray-500">
+                  {keepBlocked
+                    ? "The time is booked in your name. Nobody else can take it."
+                    : 'The time becomes free. People on the "Notify me" list are told.'}
+                </span>
+              </span>
+            </label>
+          )}
+          {!reasonRequired && (
+            <p className="mt-3 text-xs text-gray-500">
+              The time becomes free. People on the &quot;Notify me&quot; list
+              are told.
+            </p>
+          )}
 
           {state?.error && (
             <p

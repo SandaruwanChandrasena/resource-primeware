@@ -172,8 +172,7 @@ async function cancelInTransaction(
   });
   if (result.count !== 1) return null;
 
-  // The freed time: tell people on the "Notify me" list (D78).
-  const freed = await tx.reservation.findFirstOrThrow({
+  return tx.reservation.findFirstOrThrow({
     where,
     select: {
       userId: true,
@@ -183,13 +182,20 @@ async function cancelInTransaction(
       resource: { select: { name: true } },
     },
   });
-  await notifyWaiting(tx, {
+}
+
+type FreedBooking = NonNullable<
+  Awaited<ReturnType<typeof cancelInTransaction>>
+>;
+
+// The freed time: tell people on the "Notify me" list (D78).
+function tellWaitingPeople(tx: Prisma.TransactionClient, freed: FreedBooking) {
+  return notifyWaiting(tx, {
     resourceId: freed.resourceId,
     resourceName: freed.resource.name,
     start: freed.startTime,
     end: freed.endTime,
   });
-  return freed;
 }
 
 // Cancel = change the status, never delete (D7). Who and when are saved (D28).
@@ -202,17 +208,21 @@ export async function cancelOwnBooking(reservationId: string, userId: string) {
       { id: reservationId, userId },
       { cancelledById: userId },
     );
-    return freed !== null;
+    if (!freed) return false;
+    await tellWaitingPeople(tx, freed);
+    return true;
   });
 }
 
 export type AdminCancelResult = { ok: true } | { ok: false; error: string };
 
 // Admin cancels any booking (D10). Reason needed for someone else's (D29).
+// keepBlocked: the admin takes the time in the same step (D81).
 export async function cancelBookingAsAdmin(
   reservationId: string,
   adminId: string,
   reason: string | null,
+  keepBlocked: boolean,
 ): Promise<AdminCancelResult> {
   return db.$transaction(async (tx) => {
     const booking = await tx.reservation.findUnique({
@@ -225,6 +235,8 @@ export async function cancelBookingAsAdmin(
     if (forSomeoneElse && !reason) {
       return { ok: false, error: "Write a reason for the booking owner." };
     }
+    // Blocking your own booking makes no sense, so only for someone else's.
+    const block = forSomeoneElse && keepBlocked;
 
     const freed = await cancelInTransaction(
       tx,
@@ -237,6 +249,22 @@ export async function cancelBookingAsAdmin(
         ok: false,
         error: "This booking was already cancelled or has started.",
       };
+    }
+
+    if (block) {
+      // Same time, admin's name. The time is never free, not even for 1 second.
+      await tx.reservation.create({
+        data: {
+          resourceId: freed.resourceId,
+          userId: adminId,
+          startTime: freed.startTime,
+          endTime: freed.endTime,
+          purpose: `Admin block: ${reason}`.slice(0, 200),
+        },
+      });
+    } else {
+      // Time is really free now, so waiting people are told (D78).
+      await tellWaitingPeople(tx, freed);
     }
 
     // Tell the owner why, in the same transaction (D6, D29).
