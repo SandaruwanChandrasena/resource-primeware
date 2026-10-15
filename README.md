@@ -4,8 +4,6 @@
 
 **Book shared rooms, equipment and vehicles — with no double bookings.**
 
-Built for the **PrimeWave Lab (Pvt) Ltd** Software Engineering Internship assessment.
-
 <br>
 
 ![Next.js](https://img.shields.io/badge/Next.js_16-App_Router-000000?logo=nextdotjs&logoColor=white)
@@ -474,7 +472,7 @@ proxy.ts        fast login redirects
 - 🗓️ Calendar **day view** and drag-to-book.
 - 📈 Charts with a custom date range, and **CSV export**.
 - 🖼️ Photos in the admin Users table (now initials only).
-- ☁️ **Deployment** with cloud photo storage (the assessment asks for local running).
+- ☁️ **Deployment** with cloud photo storage.
 - 🌙 Dark mode, bulk actions, and case-insensitive unique names.
 
 <br>
@@ -483,6 +481,6 @@ proxy.ts        fast login redirects
 
 <div align="center">
 
-Made by **Sandaruwan Chandrasena** for the PrimeWave Lab internship assessment.
+Made by **Sandaruwan Chandrasena**.
 
 </div>
