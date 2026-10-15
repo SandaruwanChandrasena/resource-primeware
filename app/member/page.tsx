@@ -3,13 +3,18 @@ import BookingCalendar from "@/components/booking/booking-calendar";
 import {
   BellIcon,
   BookingsIcon,
+  CalendarIcon,
   PlusIcon,
   ResourcesIcon,
 } from "@/components/layout/app-icons";
 import StatCard from "@/components/ui/stat-card";
 import { db } from "@/lib/db";
 import { requireMember } from "@/lib/security/auth-guard";
-import { formatDate, formatTime } from "@/lib/utils/colombo-time";
+import {
+  formatDate,
+  formatLongDate,
+  formatTime,
+} from "@/lib/utils/colombo-time";
 
 export const metadata = { title: "My home | Resource Reservation" };
 
@@ -46,18 +51,27 @@ export default async function MemberHomePage({
 
   return (
     <section className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
+          {/* First name only: friendlier and shorter. */}
           <h1 className="text-2xl font-bold tracking-tight">
-            Welcome, {user.name}
+            Welcome back, {user.name.split(" ")[0]}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {user.department ?? "No department"}
-          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            {user.department && (
+              <span className="rounded-full bg-brand-50 px-2.5 py-0.5 font-medium text-brand-700">
+                {user.department}
+              </span>
+            )}
+            <span className="flex items-center gap-1.5 text-gray-500">
+              <CalendarIcon className="h-4 w-4" />
+              {formatLongDate(now)}
+            </span>
+          </div>
         </div>
         <Link
           href="/member/resources"
-          className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          className="flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-brand-700"
         >
           <PlusIcon className="h-4 w-4" />
           Book a resource
@@ -71,6 +85,7 @@ export default async function MemberHomePage({
           hint="View my bookings"
           href="/member/bookings"
           icon={BookingsIcon}
+          tone="blue"
         />
         <StatCard
           label="Next booking"
@@ -82,21 +97,33 @@ export default async function MemberHomePage({
           }
           href={nextBooking ? "/member/bookings" : "/member/resources"}
           icon={ResourcesIcon}
+          tone="violet"
         />
         <StatCard
           label="Waiting for"
           value={waitingCount}
-          hint="Notify me times. The bell tells you when free."
+          hint="The bell tells you when free"
           icon={BellIcon}
+          tone="amber"
         />
       </div>
 
       {/* Everyone's bookings: a clear view of what is taken (the business problem). */}
-      <BookingCalendar
-        query={await searchParams}
-        basePath="/member"
-        currentUserId={user.id}
-      />
+      <div className="flex flex-col gap-3">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">
+            Booking calendar
+          </h2>
+          <p className="mt-0.5 text-sm text-gray-500">
+            See what is booked and when, before you book.
+          </p>
+        </div>
+        <BookingCalendar
+          query={await searchParams}
+          basePath="/member"
+          currentUserId={user.id}
+        />
+      </div>
     </section>
   );
 }
