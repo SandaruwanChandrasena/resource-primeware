@@ -4,6 +4,11 @@ A web app for booking shared resources (meeting rooms, equipment and vehicles) w
 
 Built for the **PrimeWave Lab (Pvt) Ltd** Software Engineering Internship assessment.
 
+### Quick links
+
+- **Shared Google Drive folder** (ER diagram and other project files, public): [open the folder](https://drive.google.com/drive/folders/1ASYh8nzYBCpyhTcFzv3vBHLu-BTy6gaD?usp=sharing)
+- **ER diagram** in this repo: [section 5](#5-database-design)
+
 ---
 
 ## 1. The business problem
@@ -23,6 +28,7 @@ The most important rule (no overlaps) is enforced by the **database itself**, so
 ## 2. Features
 
 ### Member
+
 - **Home page:** cards (upcoming bookings, next booking, waiting for) and a **shared booking calendar** (month and week view, resource filter).
 - **Resources page:** search, type filter, sort, grid or list view, photos.
 - **Book a resource:** form, then a **review page**, then confirm. A clear **clash message** appears if the time is taken (time and department only, no names).
@@ -31,6 +37,7 @@ The most important rule (no overlaps) is enforced by the **database itself**, so
 - **Profile:** your details, your own photo, change password.
 
 ### Admin
+
 - **Dashboard:** summary cards, today's bookings, and two charts:
   - **Most booked resources** (by booked **hours**).
   - **Most cancelled resources** (count, **cancel rate**, and member/admin split).
@@ -45,24 +52,26 @@ The most important rule (no overlaps) is enforced by the **database itself**, so
 
 ## 3. Tech stack and why
 
-| Part | Choice | Why |
-|---|---|---|
-| Framework | **Next.js 16 (App Router)** + **TypeScript** | Required. Server Components for pages, Server Actions for forms. |
-| Database | **PostgreSQL 17** | Required. Supports **exclusion constraints** for the no-overlap rule. |
-| ORM | **Prisma 7.10.0** (+ `@prisma/adapter-pg`) | Type-safe queries and migrations. |
-| Validation | **Zod 4** | Every form and API input is checked on the server. |
-| Login | **bcryptjs** + **jose** | Hashed passwords and an encrypted httpOnly session cookie. Small and simple; no extra auth service. |
-| Styling | **Tailwind CSS 4** | No UI library. Charts are plain CSS bars (no chart library). |
+| Part       | Choice                                       | Why                                                                                                 |
+| ---------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Framework  | **Next.js 16 (App Router)** + **TypeScript** | Required. Server Components for pages, Server Actions for forms.                                    |
+| Database   | **PostgreSQL 17**                            | Required. Supports **exclusion constraints** for the no-overlap rule.                               |
+| ORM        | **Prisma 7.10.0** (+ `@prisma/adapter-pg`)   | Type-safe queries and migrations.                                                                   |
+| Validation | **Zod 4**                                    | Every form and API input is checked on the server.                                                  |
+| Login      | **bcryptjs** + **jose**                      | Hashed passwords and an encrypted httpOnly session cookie. Small and simple; no extra auth service. |
+| Styling    | **Tailwind CSS 4**                           | No UI library. Charts are plain CSS bars (no chart library).                                        |
 
 ---
 
 ## 4. Setup and run (local)
 
 ### Requirements
+
 - **Node.js 22** and **npm**
 - **PostgreSQL 17** running on your machine
 
 ### Steps
+
 1. **Install packages**
    ```bash
    npm install
@@ -98,28 +107,33 @@ The most important rule (no overlaps) is enforced by the **database itself**, so
 
 ### Demo logins (from the seed)
 
-| Role | Email | Password | Department |
-|---|---|---|---|
-| Admin | admin@primewave.lk | Admin@123 | IT |
-| Member | nimal@primewave.lk | Member@123 | Marketing |
-| Member | ayesha@primewave.lk | Member@123 | Finance |
-| Member | kasun@primewave.lk | Member@123 | Engineering |
+| Role   | Email               | Password   | Department  |
+| ------ | ------------------- | ---------- | ----------- |
+| Admin  | admin@primewave.lk  | Admin@123  | IT          |
+| Member | nimal@primewave.lk  | Member@123 | Marketing   |
+| Member | ayesha@primewave.lk | Member@123 | Finance     |
+| Member | kasun@primewave.lk  | Member@123 | Engineering |
 
 Demo resources: Meeting Room A, Board Room, Training Hall, Projector 1, Projector 2, Company Van (no photos; upload them as admin).
 
 ### Good to know
+
 - **`DEMO_DELAY_MS`**: a fake wait (in ms) in every button action, so loaders can be seen in the demo video. It also waits between the code clash check and the database insert, so the **database overlap guard** can be shown with two browsers. Set it to **0** for normal speed.
 - **Photos** are saved on disk in `uploads/` (created automatically, **not in git**).
 - **Time zone:** times are stored in **UTC** and shown in **Sri Lanka time** (Asia/Colombo). The database connection always uses a UTC session, so the app works with any PostgreSQL time zone setting.
 - **Booking settings** (in `lib/config/booking-settings.ts`): 07:00 to 20:00, 30-minute steps, same-day bookings, up to 30 days ahead.
 
 ### Reset to a clean start
+
 Close pgAdmin connections first, then:
+
 ```bash
 npx prisma migrate reset
 npx prisma db seed
 ```
+
 On Windows PowerShell, also delete old photos and the Next.js cache:
+
 ```powershell
 Remove-Item -Recurse -Force uploads
 Remove-Item -Recurse -Force .next
@@ -130,35 +144,39 @@ Remove-Item -Recurse -Force .next
 ## 5. Database design
 
 ### ER diagram
+
 ![ER diagram](docs/resource-reservation-er-diagram.png)
 
 - Picture: [`docs/resource-reservation-er-diagram.png`](docs/resource-reservation-er-diagram.png)
 - Editable draw.io file: [`docs/resource-reservation-er-diagram.drawio`](docs/resource-reservation-er-diagram.drawio)
+- Shared Google Drive folder (public): [open the folder](https://drive.google.com/drive/folders/1ASYh8nzYBCpyhTcFzv3vBHLu-BTy6gaD?usp=sharing)
 - Open online (public, no login): [view in diagrams.net](https://viewer.diagrams.net/?nav=1#Uhttps%3A%2F%2Fraw.githubusercontent.com%2FSandaruwanChandrasena%2Fresource-primeware%2Fmain%2Fdocs%2Fresource-reservation-er-diagram.drawio)
 
 The diagram uses **Chen notation**: rectangle = entity, oval = attribute, underlined = key, diamond = relationship, double line = total participation.
 
 ### Relationships (all 1 : N)
 
-| Relationship | Meaning |
-|---|---|
-| User **makes** Reservation | One user owns many bookings. Every booking has exactly one owner. |
-| User **cancels** Reservation | One user (the owner or an admin) can cancel many bookings. A booking has zero or one canceller. |
-| Resource **has** Reservation | One resource has many bookings. Every booking is for exactly one resource. |
-| User **joins** WaitlistEntry | One user can wait for many time slots. |
-| Resource **for** WaitlistEntry | Many people can wait for one resource. |
-| User **receives** Notification | One user gets many bell notifications. |
+| Relationship                   | Meaning                                                                                         |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| User **makes** Reservation     | One user owns many bookings. Every booking has exactly one owner.                               |
+| User **cancels** Reservation   | One user (the owner or an admin) can cancel many bookings. A booking has zero or one canceller. |
+| Resource **has** Reservation   | One resource has many bookings. Every booking is for exactly one resource.                      |
+| User **joins** WaitlistEntry   | One user can wait for many time slots.                                                          |
+| Resource **for** WaitlistEntry | Many people can wait for one resource.                                                          |
+| User **receives** Notification | One user gets many bell notifications.                                                          |
 
 ### Relational schema
-Primary keys are **bold**; foreign keys are *italic*.
+
+Primary keys are **bold**; foreign keys are _italic_.
 
 - **users** (**id**, name, email, phone, password, role, department, image_name, is_active, created_at)
 - **resources** (**id**, name, type, location, capacity, description, image_name, is_active, created_at, updated_at)
-- **reservations** (**id**, *resource_id*, *user_id*, start_time, end_time, purpose, status, cancelled_at, *cancelled_by_id*, cancel_reason, created_at)
-- **waitlist_entries** (**id**, *user_id*, *resource_id*, start_time, end_time, status, created_at)
-- **notifications** (**id**, *user_id*, message, link, is_read, created_at)
+- **reservations** (**id**, _resource_id_, _user_id_, start_time, end_time, purpose, status, cancelled_at, _cancelled_by_id_, cancel_reason, created_at)
+- **waitlist_entries** (**id**, _user_id_, _resource_id_, start_time, end_time, status, created_at)
+- **notifications** (**id**, _user_id_, message, link, is_read, created_at)
 
 Foreign keys:
+
 - `reservations.resource_id → resources.id`
 - `reservations.user_id → users.id`
 - `reservations.cancelled_by_id → users.id` (NULL if never cancelled)
@@ -167,6 +185,7 @@ Foreign keys:
 - `notifications.user_id → users.id`
 
 ### Database rules
+
 - **No overlapping bookings** (PostgreSQL exclusion constraint, migration `overlap_rule`):
   ```sql
   EXCLUDE USING gist (
@@ -212,13 +231,13 @@ Most features use Server Actions (browser only). One JSON API exists for the not
 **Login cookie:** log in in Chrome, then open F12 → Application → Cookies → `localhost:3000` and copy the value of `session`.
 In Postman, add the header `Cookie: session=<value>`.
 
-| Method | URL | Body (raw JSON) | Result |
-|---|---|---|---|
-| GET | `http://localhost:3000/api/notifications` | none | `200 { "unreadCount": 1, "items": [...] }` |
-| PATCH | `http://localhost:3000/api/notifications` | `{ "id": "<notification uuid>" }` | `200 { "updated": 1 }` (0 if not yours or already read) |
-| PATCH | `http://localhost:3000/api/notifications` | `{ "all": true }` | `200 { "updated": <count> }` |
-| PATCH | `http://localhost:3000/api/notifications` | `{ "id": "abc" }` | `400` |
-| any | same URL, no cookie or a changed cookie | | `401 { "error": "Not logged in" }` |
+| Method | URL                                       | Body (raw JSON)                   | Result                                                  |
+| ------ | ----------------------------------------- | --------------------------------- | ------------------------------------------------------- |
+| GET    | `http://localhost:3000/api/notifications` | none                              | `200 { "unreadCount": 1, "items": [...] }`              |
+| PATCH  | `http://localhost:3000/api/notifications` | `{ "id": "<notification uuid>" }` | `200 { "updated": 1 }` (0 if not yours or already read) |
+| PATCH  | `http://localhost:3000/api/notifications` | `{ "all": true }`                 | `200 { "updated": <count> }`                            |
+| PATCH  | `http://localhost:3000/api/notifications` | `{ "id": "abc" }`                 | `400`                                                   |
+| any    | same URL, no cookie or a changed cookie   |                                   | `401 { "error": "Not logged in" }`                      |
 
 Photo routes (logged-in only): `GET /api/resource-images/<name>` and `GET /api/user-images/<name>`.
 
