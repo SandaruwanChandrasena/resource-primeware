@@ -7,10 +7,12 @@ import {
 import ResourcePhoto from "@/components/ui/resource-photo";
 import StatusPill from "@/components/ui/status-pill";
 import UserAvatar from "@/components/ui/user-avatar";
+import { MAX_DAYS_AHEAD } from "@/lib/config/booking-settings";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/security/auth-guard";
 import {
   addDays,
+  formatDate,
   formatLongDate,
   formatTime,
   toUtc,
@@ -22,6 +24,16 @@ export const metadata = { title: "Admin dashboard | Resource Reservation" };
 
 // Shown on the dashboard; the full list is on the Bookings page.
 const TODAY_LIMIT = 10;
+// Chart: top resources by booked hours, 30 days back and 30 days ahead.
+const TOP_LIMIT = 5;
+const DAYS_BACK = 30;
+
+type TopResource = { id: string; name: string; hours: number; bookings: number };
+
+// e.g. 4.5 -> "4.5 h", 3 -> "3 h"
+function formatHours(hours: number) {
+  return `${Number(hours.toFixed(1))} h`;
+}
 
 type StatCardProps = {
   label: string;
@@ -67,9 +79,19 @@ export default async function AdminDashboardPage() {
   const weekFrom = toUtc(weekStart, "00:00");
   const weekTo = toUtc(addDays(weekStart, 7), "00:00");
 
+  // Chart window: past 30 days + all future days members can book (D64).
+  const chartFrom = toUtc(addDays(today, -DAYS_BACK), "00:00");
+  const chartTo = toUtc(addDays(today, MAX_DAYS_AHEAD + 1), "00:00");
+
   // The database counts; it never sends all rows (fast as data grows).
-  const [todayCount, weekCount, resourceCount, userCount, todayBookings] =
-    await Promise.all([
+  const [
+    todayCount,
+    weekCount,
+    resourceCount,
+    userCount,
+    todayBookings,
+    topResources,
+  ] = await Promise.all([
       db.reservation.count({
         where: {
           status: "CONFIRMED",
@@ -103,7 +125,21 @@ export default async function AdminDashboardPage() {
           user: { select: { name: true, department: true, imageName: true } },
         },
       }),
+      // Booked HOURS per resource: one 4 h booking uses more than two 30 min ones.
+      // Prisma groupBy can't sum (end - start), so one safe raw query (values are parameters).
+      db.$queryRaw<TopResource[]>`
+        SELECT s.id, s.name,
+          (SUM(EXTRACT(EPOCH FROM (r.end_time - r.start_time))) / 3600)::float8 AS hours,
+          COUNT(*)::int AS bookings
+        FROM reservations r
+        JOIN resources s ON s.id = r.resource_id
+        WHERE r.status = 'CONFIRMED'
+          AND r.start_time >= ${chartFrom} AND r.start_time < ${chartTo}
+        GROUP BY s.id, s.name
+        ORDER BY hours DESC, s.name ASC
+        LIMIT ${TOP_LIMIT}`,
     ]);
+  const maxHours = topResources[0]?.hours ?? 0;
 
   return (
     <section className="flex flex-col gap-6">
@@ -143,6 +179,47 @@ export default async function AdminDashboardPage() {
           href="/admin/users?status=active"
           icon={UsersIcon}
         />
+      </div>
+
+      <div className="rounded-xl border border-gray-200 bg-white p-4">
+        <h2 className="text-base font-semibold">Most booked resources</h2>
+        <p className="text-sm text-gray-500">
+          Hours booked from {formatDate(chartFrom)} to{" "}
+          {formatDate(new Date(chartTo.getTime() - 1))}. Cancelled bookings
+          are not counted.
+        </p>
+
+        {topResources.length === 0 ? (
+          <p className="py-8 text-center text-sm text-gray-500">
+            No bookings in this period yet.
+          </p>
+        ) : (
+          // Plain CSS bars, no chart library (D11).
+          <ul className="mt-4 flex flex-col gap-3">
+            {topResources.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/admin/bookings?resource=${r.id}`}
+                  title={`${r.bookings} booking(s) · ${formatHours(r.hours)}`}
+                  className="group grid grid-cols-[8rem_1fr_4rem] items-center gap-3 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 sm:grid-cols-[11rem_1fr_5rem]"
+                >
+                  <span className="truncate text-sm font-medium text-gray-700 group-hover:text-brand-700">
+                    {r.name}
+                  </span>
+                  <span className="h-3 overflow-hidden rounded-full bg-gray-100">
+                    <span
+                      className="block h-full rounded-full bg-brand-600 transition-colors group-hover:bg-brand-700"
+                      style={{ width: `${Math.max(4, (r.hours / maxHours) * 100)}%` }}
+                    />
+                  </span>
+                  <span className="text-right text-sm tabular-nums text-gray-600">
+                    {formatHours(r.hours)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white">
