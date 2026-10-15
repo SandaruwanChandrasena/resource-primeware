@@ -138,7 +138,7 @@ export default function UserForm({ user, isSelf = false }: UserFormProps) {
           {/* D49: own role is locked (the server checks it too). */}
           {isSelf && (
             <span className="text-xs font-normal text-gray-500">
-              You can't change your own role.
+              You can&apos;t change your own role.
             </span>
           )}
           <FieldError message={fieldError("role")} />
