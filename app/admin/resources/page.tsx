@@ -182,6 +182,17 @@ export default async function AdminResourcesPage({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
+                        {/* Admin books in their own name (D27). Inactive: same-size gap keeps buttons lined up. */}
+                        {r.isActive ? (
+                          <Link
+                            href={`/admin/resources/${r.id}/book`}
+                            className="flex w-14 items-center justify-center rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-700"
+                          >
+                            Book
+                          </Link>
+                        ) : (
+                          <span className="w-14" aria-hidden="true" />
+                        )}
                         <Link
                           href={`/admin/resources/${r.id}/edit`}
                           className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"

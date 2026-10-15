@@ -208,6 +208,7 @@ export const adminBookingsFilterSchema = z.object({
   q: z.string().trim().max(80).catch(""),
   resource: z.uuid().optional().catch(undefined),
   sort: z.enum(BOOKING_SORTS).optional().catch(undefined),
+  newId: z.uuid().optional().catch(undefined),
   ...pageFields,
 });
 

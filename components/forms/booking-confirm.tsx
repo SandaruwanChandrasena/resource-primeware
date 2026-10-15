@@ -11,6 +11,7 @@ type BookingConfirmProps = {
   resourceId: string;
   values: BookingFormValues;
   changeHref: string;
+  allowNotifyMe?: boolean;
 };
 
 // Step 2 of booking: the "Confirm" button on the review page.
@@ -18,6 +19,7 @@ export default function BookingConfirm({
   resourceId,
   values,
   changeHref,
+  allowNotifyMe = true,
 }: BookingConfirmProps) {
   const [state, formAction] = useActionState<ConfirmBookingState, FormData>(
     confirmBooking,
@@ -38,7 +40,7 @@ export default function BookingConfirm({
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         {/* Its own form, so it sits outside the confirm form (no nested forms). */}
-        {state?.isClash ? (
+        {allowNotifyMe && state?.isClash ? (
           <NotifyMeButton
             resourceId={resourceId}
             date={values.date}

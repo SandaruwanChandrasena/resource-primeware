@@ -29,7 +29,7 @@ export default async function AdminBookingsPage({
   searchParams,
 }: AdminBookingsPageProps) {
   const admin = await requireAdmin();
-  const { tab, q, resource, sort, page, size } =
+  const { tab, q, resource, sort, page, size, newId } =
     adminBookingsFilterSchema.parse(await searchParams);
   const currentTab = tab ?? "upcoming";
   const now = new Date();
@@ -98,6 +98,18 @@ export default async function AdminBookingsPage({
     },
   });
 
+  // Just booked by this admin? Show it at the top (D66).
+  const newBooking = newId
+    ? await db.reservation.findFirst({
+        where: { id: newId, userId: admin.id },
+        select: {
+          startTime: true,
+          endTime: true,
+          resource: { select: { name: true } },
+        },
+      })
+    : null;
+
   const resourceOptions = Object.fromEntries(
     resources.map((r) => [r.id, r.name]),
   );
@@ -109,9 +121,21 @@ export default async function AdminBookingsPage({
       <div>
         <h1 className="text-2xl font-bold tracking-tight">All bookings</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Every booking by every person. Times are in Sri Lanka time.
+          Every booking by every person. To book yourself, use Book on the
+          Resources page. Times are in Sri Lanka time.
         </p>
       </div>
+
+      {newBooking && (
+        <p
+          role="status"
+          className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700"
+        >
+          <span className="font-semibold">Booking confirmed:</span>{" "}
+          {newBooking.resource.name} on {formatDate(newBooking.startTime)},{" "}
+          {formatTime(newBooking.startTime)}–{formatTime(newBooking.endTime)}.
+        </p>
+      )}
 
       <div className="rounded-xl border border-gray-200 bg-white">
         <FilterTabs
@@ -158,7 +182,10 @@ export default async function AdminBookingsPage({
                 const canCancel = b.status === "CONFIRMED" && !started;
                 const when = `${b.resource.name}, ${formatDate(b.startTime)}, ${formatTime(b.startTime)}–${formatTime(b.endTime)}`;
                 return (
-                  <tr key={b.id} className="transition-colors hover:bg-gray-50">
+                  <tr
+                    key={b.id}
+                    className={`transition-colors hover:bg-gray-50 ${b.id === newId ? "bg-green-50/70" : ""}`}
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <ResourcePhoto

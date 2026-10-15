@@ -42,8 +42,14 @@ export async function confirmBooking(
   const result = await createBooking({ ...parsed.data, userId: user.id });
   if (!result.ok) return { error: result.error, isClash: result.isClash };
 
+  // Each role lands on its own bookings list, with the new row highlighted.
+  revalidatePath("/admin", "layout");
   revalidatePath("/member", "layout");
-  redirect(`/member/bookings?newId=${result.id}`);
+  redirect(
+    user.role === "ADMIN"
+      ? `/admin/bookings?newId=${result.id}`
+      : `/member/bookings?newId=${result.id}`,
+  );
 }
 
 // Cancel one of your own upcoming bookings.
