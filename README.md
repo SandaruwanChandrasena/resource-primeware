@@ -14,9 +14,11 @@
 
 <br>
 
-[📁 **Shared Google Drive folder**](https://drive.google.com/drive/folders/1ASYh8nzYBCpyhTcFzv3vBHLu-BTy6gaD?usp=sharing)
+[🎬 **Demo video**](https://drive.google.com/file/d/1d930d1UAscOiKN15ULzrXxrrWMiNooWK/view?usp=drive_link)
 &nbsp;·&nbsp;
-[🗂️ **ER diagram**](#database)
+[🗂️ **ER diagram**](https://drive.google.com/file/d/13wLU576ODD3AEtIN-_ZrpBCSP4KHazTq/view?usp=sharing)
+&nbsp;·&nbsp;
+[📁 **Shared Google Drive folder**](https://drive.google.com/drive/folders/1ASYh8nzYBCpyhTcFzv3vBHLu-BTy6gaD?usp=sharing)
 &nbsp;·&nbsp;
 [🚀 **Setup and run**](#setup)
 
@@ -271,6 +273,8 @@ Remove-Item -Recurse -Force .next
 
 - 🖼️ **Picture:** [`docs/resource-reservation-er-diagram.png`](docs/resource-reservation-er-diagram.png)
 - ✏️ **Editable draw.io file:** [`docs/resource-reservation-er-diagram.drawio`](docs/resource-reservation-er-diagram.drawio)
+- 🖼️ **ER diagram picture (Google Drive, public):** [open the picture](https://drive.google.com/file/d/13wLU576ODD3AEtIN-_ZrpBCSP4KHazTq/view?usp=sharing)
+- ✏️ **ER diagram draw.io file (Google Drive, public):** [open the file](https://drive.google.com/file/d/1ho_VGxDP5oPM2ZlGwEn5Aovbvwo066Y0/view?usp=sharing)
 - 📁 **Shared Google Drive folder (public):** [open the folder](https://drive.google.com/drive/folders/1ASYh8nzYBCpyhTcFzv3vBHLu-BTy6gaD?usp=sharing)
 - 🌐 **Open online (public, no login):** [view in diagrams.net](https://viewer.diagrams.net/?nav=1#Uhttps%3A%2F%2Fraw.githubusercontent.com%2FSandaruwanChandrasena%2Fresource-primeware%2Fmain%2Fdocs%2Fresource-reservation-er-diagram.drawio)
 
