@@ -3,7 +3,6 @@ import BookingCalendar from "@/components/booking/booking-calendar";
 import {
   BellIcon,
   BookingsIcon,
-  CalendarIcon,
   PlusIcon,
   ResourcesIcon,
 } from "@/components/layout/app-icons";
@@ -57,17 +56,11 @@ export default async function MemberHomePage({
           <h1 className="text-2xl font-bold tracking-tight">
             Welcome back, {user.name.split(" ")[0]}
           </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-            {user.department && (
-              <span className="rounded-full bg-brand-50 px-2.5 py-0.5 font-medium text-brand-700">
-                {user.department}
-              </span>
-            )}
-            <span className="flex items-center gap-1.5 text-gray-500">
-              <CalendarIcon className="h-4 w-4" />
-              {formatLongDate(now)}
-            </span>
-          </div>
+          {/* One short line: department · date. */}
+          <p className="mt-1 text-sm text-gray-500">
+            {user.department ? `${user.department} · ` : ""}
+            {formatLongDate(now)}
+          </p>
         </div>
         <Link
           href="/member/resources"
@@ -82,7 +75,7 @@ export default async function MemberHomePage({
         <StatCard
           label="Upcoming bookings"
           value={upcomingCount}
-          hint="View my bookings"
+          hint="View all"
           href="/member/bookings"
           icon={BookingsIcon}
           tone="blue"
@@ -102,28 +95,17 @@ export default async function MemberHomePage({
         <StatCard
           label="Waiting for"
           value={waitingCount}
-          hint="The bell tells you when free"
           icon={BellIcon}
           tone="amber"
         />
       </div>
 
       {/* Everyone's bookings: a clear view of what is taken (the business problem). */}
-      <div className="flex flex-col gap-3">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">
-            Booking calendar
-          </h2>
-          <p className="mt-0.5 text-sm text-gray-500">
-            See what is booked and when, before you book.
-          </p>
-        </div>
-        <BookingCalendar
-          query={await searchParams}
-          basePath="/member"
-          currentUserId={user.id}
-        />
-      </div>
+      <BookingCalendar
+        query={await searchParams}
+        basePath="/member"
+        currentUserId={user.id}
+      />
     </section>
   );
 }

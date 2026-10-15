@@ -11,7 +11,7 @@ const TONES = {
 type StatCardProps = {
   label: string;
   value: string | number;
-  hint: string;
+  hint?: string;
   href?: string;
   icon: (props: { className?: string }) => React.ReactNode;
   tone?: keyof typeof TONES;
@@ -42,12 +42,15 @@ export default function StatCard({
       >
         {value}
       </p>
-      <p
-        className={`truncate text-xs ${href ? "font-medium text-brand-600 group-hover:text-brand-700" : "text-gray-500"}`}
-      >
-        {hint}
-        {href && <span aria-hidden="true"> →</span>}
-      </p>
+      {/* No hint = no extra line (keeps the card quiet). */}
+      {hint && (
+        <p
+          className={`truncate text-xs ${href ? "font-medium text-brand-600 group-hover:text-brand-700" : "text-gray-500"}`}
+        >
+          {hint}
+          {href && <span aria-hidden="true"> →</span>}
+        </p>
+      )}
     </>
   );
   const box =
