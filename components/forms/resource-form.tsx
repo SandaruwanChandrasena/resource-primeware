@@ -33,6 +33,11 @@ function FieldError({ message }: { message?: string }) {
   return <span className="text-xs font-normal text-red-600">{message}</span>;
 }
 
+// Same limits as the server (D69). Checked here first, because Next.js stops
+// a form over 3 MB with an error page before the server check can run.
+const MAX_MB = 2;
+const TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 type PhotoFieldProps = { currentImage: string | null; error?: string };
 
 // Photo picker with a preview. It gets a new key after each try,
@@ -40,13 +45,27 @@ type PhotoFieldProps = { currentImage: string | null; error?: string };
 function PhotoField({ currentImage, error }: PhotoFieldProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [remove, setRemove] = useState(false);
+  const [pickError, setPickError] = useState("");
   const shown =
     preview ??
     (currentImage && !remove ? resourceImageUrl(currentImage) : null);
 
-  function pick(file: File | undefined) {
+  function pick(input: HTMLInputElement) {
+    const file = input.files?.[0];
     if (preview) URL.revokeObjectURL(preview);
-    setPreview(file ? URL.createObjectURL(file) : null);
+    setPreview(null);
+    setPickError("");
+    if (!file) return;
+    // A bad file is cleared from the box, so it is never sent.
+    if (!TYPES.includes(file.type)) {
+      input.value = "";
+      return setPickError("Choose a JPG, PNG or WebP photo.");
+    }
+    if (file.size > MAX_MB * 1024 * 1024) {
+      input.value = "";
+      return setPickError(`Photo is too big (max ${MAX_MB} MB).`);
+    }
+    setPreview(URL.createObjectURL(file));
   }
 
   return (
@@ -68,7 +87,7 @@ function PhotoField({ currentImage, error }: PhotoFieldProps) {
             name="image"
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => pick(e.target.files?.[0])}
+            onChange={(e) => pick(e.target)}
             className="text-sm font-normal text-gray-600 file:mr-3 file:rounded-lg file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-50"
           />
           <span className="text-xs font-normal text-gray-500">
@@ -87,7 +106,7 @@ function PhotoField({ currentImage, error }: PhotoFieldProps) {
           )}
         </div>
       </div>
-      <FieldError message={error} />
+      <FieldError message={pickError || error} />
     </div>
   );
 }
