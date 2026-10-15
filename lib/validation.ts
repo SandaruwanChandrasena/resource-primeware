@@ -226,3 +226,15 @@ export const adminCancelSchema = z.object({
       .nullable(),
   ),
 });
+
+// Dashboard charts the admin has hidden, e.g. ?hide=cancelled. Unknown values are dropped.
+export const DASHBOARD_CHARTS = ["booked", "cancelled"] as const;
+
+export const dashboardFilterSchema = z.object({
+  hide: z
+    .string()
+    .catch("")
+    .transform((text) =>
+      DASHBOARD_CHARTS.filter((chart) => text.split(",").includes(chart)),
+    ),
+});

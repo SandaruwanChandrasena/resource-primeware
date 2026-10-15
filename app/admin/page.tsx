@@ -4,6 +4,8 @@ import {
   ResourcesIcon,
   UsersIcon,
 } from "@/components/layout/app-icons";
+import ChartToggles from "@/components/list-tools/chart-toggles";
+import BarChart from "@/components/ui/bar-chart";
 import ResourcePhoto from "@/components/ui/resource-photo";
 import StatusPill from "@/components/ui/status-pill";
 import UserAvatar from "@/components/ui/user-avatar";
@@ -19,16 +21,29 @@ import {
   todayInColombo,
   weekStartInColombo,
 } from "@/lib/utils/colombo-time";
+import { dashboardFilterSchema } from "@/lib/validation";
 
 export const metadata = { title: "Admin dashboard | Resource Reservation" };
 
 // Shown on the dashboard; the full list is on the Bookings page.
 const TODAY_LIMIT = 10;
-// Chart: top resources by booked hours, 30 days back and 30 days ahead.
+// Charts: top resources, 30 days back and 30 days ahead.
 const TOP_LIMIT = 5;
 const DAYS_BACK = 30;
 
-type TopResource = { id: string; name: string; hours: number; bookings: number };
+type TopResource = {
+  id: string;
+  name: string;
+  hours: number;
+  bookings: number;
+};
+type CancelledResource = {
+  id: string;
+  name: string;
+  cancelled: number;
+  total: number;
+  byOwner: number;
+};
 
 // e.g. 4.5 -> "4.5 h", 3 -> "3 h"
 function formatHours(hours: number) {
@@ -66,9 +81,18 @@ function StatCard({ label, value, hint, href, icon: Icon }: StatCardProps) {
   );
 }
 
-export default async function AdminDashboardPage() {
+type AdminDashboardPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function AdminDashboardPage({
+  searchParams,
+}: AdminDashboardPageProps) {
   // Pages check again: layouts alone are not a security check.
   const user = await requireAdmin();
+  const { hide } = dashboardFilterSchema.parse(await searchParams);
+  const showBooked = !hide.includes("booked");
+  const showCancelled = !hide.includes("cancelled");
   const now = new Date();
 
   // Day and week edges in Sri Lanka time (D19). Week = Monday to Sunday.
@@ -91,43 +115,46 @@ export default async function AdminDashboardPage() {
     userCount,
     todayBookings,
     topResources,
+    cancelledResources,
   ] = await Promise.all([
-      db.reservation.count({
-        where: {
-          status: "CONFIRMED",
-          startTime: { gte: dayStart, lt: dayEnd },
+    db.reservation.count({
+      where: {
+        status: "CONFIRMED",
+        startTime: { gte: dayStart, lt: dayEnd },
+      },
+    }),
+    db.reservation.count({
+      where: {
+        status: "CONFIRMED",
+        startTime: { gte: weekFrom, lt: weekTo },
+      },
+    }),
+    db.resource.count({ where: { isActive: true } }),
+    db.user.count({ where: { isActive: true } }),
+    // Cancelled ones are not counted or listed.
+    db.reservation.findMany({
+      where: {
+        status: "CONFIRMED",
+        startTime: { gte: dayStart, lt: dayEnd },
+      },
+      orderBy: { startTime: "asc" },
+      take: TODAY_LIMIT,
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        purpose: true,
+        resource: {
+          select: { name: true, type: true, location: true, imageName: true },
         },
-      }),
-      db.reservation.count({
-        where: {
-          status: "CONFIRMED",
-          startTime: { gte: weekFrom, lt: weekTo },
-        },
-      }),
-      db.resource.count({ where: { isActive: true } }),
-      db.user.count({ where: { isActive: true } }),
-      // Cancelled ones are not counted or listed.
-      db.reservation.findMany({
-        where: {
-          status: "CONFIRMED",
-          startTime: { gte: dayStart, lt: dayEnd },
-        },
-        orderBy: { startTime: "asc" },
-        take: TODAY_LIMIT,
-        select: {
-          id: true,
-          startTime: true,
-          endTime: true,
-          purpose: true,
-          resource: {
-            select: { name: true, type: true, location: true, imageName: true },
-          },
-          user: { select: { name: true, department: true, imageName: true } },
-        },
-      }),
-      // Booked HOURS per resource: one 4 h booking uses more than two 30 min ones.
-      // Prisma groupBy can't sum (end - start), so one safe raw query (values are parameters).
-      db.$queryRaw<TopResource[]>`
+        user: { select: { name: true, department: true, imageName: true } },
+      },
+    }),
+    // Booked HOURS per resource: one 4 h booking uses more than two 30 min ones.
+    // Prisma groupBy can't sum (end - start), so one safe raw query (values are parameters).
+    // A hidden chart skips its query.
+    showBooked
+      ? db.$queryRaw<TopResource[]>`
         SELECT s.id, s.name,
           (SUM(EXTRACT(EPOCH FROM (r.end_time - r.start_time))) / 3600)::float8 AS hours,
           COUNT(*)::int AS bookings
@@ -137,9 +164,27 @@ export default async function AdminDashboardPage() {
           AND r.start_time >= ${chartFrom} AND r.start_time < ${chartTo}
         GROUP BY s.id, s.name
         ORDER BY hours DESC, s.name ASC
-        LIMIT ${TOP_LIMIT}`,
-    ]);
-  const maxHours = topResources[0]?.hours ?? 0;
+        LIMIT ${TOP_LIMIT}`
+      : Promise.resolve([] as TopResource[]),
+    // Cancels per resource + all bookings (for the rate) + who cancelled.
+    showCancelled
+      ? db.$queryRaw<CancelledResource[]>`
+        SELECT s.id, s.name,
+          COUNT(*) FILTER (WHERE r.status = 'CANCELLED')::int AS cancelled,
+          COUNT(*)::int AS total,
+          COUNT(*) FILTER (
+            WHERE r.status = 'CANCELLED' AND r.cancelled_by_id = r.user_id
+          )::int AS "byOwner"
+        FROM reservations r
+        JOIN resources s ON s.id = r.resource_id
+        WHERE r.start_time >= ${chartFrom} AND r.start_time < ${chartTo}
+        GROUP BY s.id, s.name
+        HAVING COUNT(*) FILTER (WHERE r.status = 'CANCELLED') > 0
+        ORDER BY cancelled DESC, s.name ASC
+        LIMIT ${TOP_LIMIT}`
+      : Promise.resolve([] as CancelledResource[]),
+  ]);
+  const chartPeriod = `${formatDate(chartFrom)} to ${formatDate(new Date(chartTo.getTime() - 1))}`;
 
   return (
     <section className="flex flex-col gap-6">
@@ -181,44 +226,58 @@ export default async function AdminDashboardPage() {
         />
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-4">
-        <h2 className="text-base font-semibold">Most booked resources</h2>
-        <p className="text-sm text-gray-500">
-          Hours booked from {formatDate(chartFrom)} to{" "}
-          {formatDate(new Date(chartTo.getTime() - 1))}. Cancelled bookings
-          are not counted.
-        </p>
-
-        {topResources.length === 0 ? (
-          <p className="py-8 text-center text-sm text-gray-500">
-            No bookings in this period yet.
-          </p>
-        ) : (
-          // Plain CSS bars, no chart library (D11).
-          <ul className="mt-4 flex flex-col gap-3">
-            {topResources.map((r) => (
-              <li key={r.id}>
-                <Link
-                  href={`/admin/bookings?resource=${r.id}`}
-                  title={`${r.bookings} booking(s) · ${formatHours(r.hours)}`}
-                  className="group grid grid-cols-[8rem_1fr_4rem] items-center gap-3 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 sm:grid-cols-[11rem_1fr_5rem]"
-                >
-                  <span className="truncate text-sm font-medium text-gray-700 group-hover:text-brand-700">
-                    {r.name}
-                  </span>
-                  <span className="h-3 overflow-hidden rounded-full bg-gray-100">
-                    <span
-                      className="block h-full rounded-full bg-brand-600 transition-colors group-hover:bg-brand-700"
-                      style={{ width: `${Math.max(4, (r.hours / maxHours) * 100)}%` }}
-                    />
-                  </span>
-                  <span className="text-right text-sm tabular-nums text-gray-600">
-                    {formatHours(r.hours)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+      <div className="flex flex-col gap-4">
+        <ChartToggles
+          charts={[
+            { value: "booked", label: "Most booked" },
+            { value: "cancelled", label: "Most cancelled" },
+          ]}
+          hidden={hide}
+        />
+        {(showBooked || showCancelled) && (
+          // Side by side on big screens when both are shown.
+          <div
+            className={`grid gap-4 ${showBooked && showCancelled ? "lg:grid-cols-2" : ""}`}
+          >
+            {showBooked && (
+              <BarChart
+                title="Most booked resources"
+                description={`Hours booked, ${chartPeriod}. Cancelled bookings are not counted.`}
+                tone="brand"
+                emptyText="No bookings in this period yet."
+                rows={topResources.map((r) => ({
+                  id: r.id,
+                  label: r.name,
+                  value: r.hours,
+                  valueText: formatHours(r.hours),
+                  href: `/admin/bookings?resource=${r.id}`,
+                  tooltip: `${r.bookings} booking(s) · ${formatHours(r.hours)}`,
+                }))}
+              />
+            )}
+            {showCancelled && (
+              <BarChart
+                title="Most cancelled resources"
+                description={`Cancelled bookings, ${chartPeriod}. The % is out of all bookings.`}
+                tone="red"
+                emptyText="No cancelled bookings in this period."
+                rows={cancelledResources.map((r) => {
+                  // Rate: 2 of 3 cancelled is worse than 4 of 40.
+                  const rate = Math.round((r.cancelled / r.total) * 100);
+                  const byAdmin = r.cancelled - r.byOwner;
+                  return {
+                    id: r.id,
+                    label: r.name,
+                    value: r.cancelled,
+                    valueText: `${r.cancelled} · ${rate}%`,
+                    subText: `${r.byOwner} by members · ${byAdmin} by admin`,
+                    href: `/admin/bookings?tab=cancelled&resource=${r.id}`,
+                    tooltip: `${r.cancelled} of ${r.total} bookings cancelled`,
+                  };
+                })}
+              />
+            )}
+          </div>
         )}
       </div>
 
