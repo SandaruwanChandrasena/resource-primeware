@@ -90,9 +90,6 @@ export default function AdminCancelForm({
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             {summary}. Booked by {ownerName}.
-            {/* Own block: cancelling it frees the time. */}
-            {!reasonRequired &&
-              ' The time becomes free. People on the "Notify me" list are told.'}
           </p>
 
           <label
@@ -109,7 +106,12 @@ export default function AdminCancelForm({
             required={reasonRequired}
             minLength={5}
             onChange={(e) => setLength(e.target.value.length)}
-            placeholder="e.g. The room is needed for an urgent board meeting."
+            // Someone else's booking = urgent case. Own block = just not needed.
+            placeholder={
+              reasonRequired
+                ? "e.g. The room is needed for an urgent board meeting."
+                : "e.g. The meeting was moved, so this block is not needed."
+            }
             className="mt-1 w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
           />
           <p className="mt-1 text-right text-xs tabular-nums text-gray-500">
