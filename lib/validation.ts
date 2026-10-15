@@ -201,3 +201,26 @@ export const myBookingsFilterSchema = z.object({
   newId: z.uuid().optional().catch(undefined),
   ...pageFields,
 });
+
+// URL filters for the admin "All bookings" page. No tab = upcoming.
+export const adminBookingsFilterSchema = z.object({
+  tab: z.enum(["past", "cancelled"]).optional().catch(undefined),
+  q: z.string().trim().max(80).catch(""),
+  resource: z.uuid().optional().catch(undefined),
+  sort: z.enum(BOOKING_SORTS).optional().catch(undefined),
+  ...pageFields,
+});
+
+// Admin cancel. The service decides if the reason is needed (D29).
+export const adminCancelSchema = z.object({
+  reservationId: z.uuid("This booking no longer exists."),
+  reason: z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .trim()
+      .min(5, "Reason must be at least 5 characters.")
+      .max(200, "Reason is too long (max 200).")
+      .nullable(),
+  ),
+});

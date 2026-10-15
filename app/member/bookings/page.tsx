@@ -71,6 +71,7 @@ export default async function MyBookingsPage({
       endTime: true,
       purpose: true,
       status: true,
+      cancelReason: true,
       resource: {
         select: { name: true, type: true, location: true, imageName: true },
       },
@@ -187,7 +188,18 @@ export default async function MyBookingsPage({
                     </td>
                     <td className="px-4 py-3">
                       {b.status === "CANCELLED" ? (
-                        <StatusPill tone="gray">Cancelled</StatusPill>
+                        <div className="max-w-xs">
+                          <StatusPill tone="gray">Cancelled</StatusPill>
+                          {/* Reason from the admin who cancelled it (D29). */}
+                          {b.cancelReason && (
+                            <div
+                              className="mt-1 truncate text-xs text-gray-500"
+                              title={b.cancelReason}
+                            >
+                              Reason: {b.cancelReason}
+                            </div>
+                          )}
+                        </div>
                       ) : ended ? (
                         <StatusPill tone="gray">Completed</StatusPill>
                       ) : started ? (

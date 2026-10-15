@@ -3,11 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireUser } from "@/lib/security/auth-guard";
+import { requireAdmin, requireUser } from "@/lib/security/auth-guard";
 import { demoDelay } from "@/lib/utils/demo-delay";
-import { cancelOwnBooking, createBooking } from "@/lib/services/booking-rules";
+import {
+  cancelBookingAsAdmin,
+  cancelOwnBooking,
+  createBooking,
+} from "@/lib/services/booking-rules";
 import { joinWaitlist } from "@/lib/services/waitlist";
-import { bookingSchema, waitlistSchema } from "@/lib/validation";
+import {
+  adminCancelSchema,
+  bookingSchema,
+  waitlistSchema,
+} from "@/lib/validation";
 
 export type ConfirmBookingState =
   | { error?: string; isClash?: boolean }
@@ -69,4 +77,35 @@ export async function notifyMe(
     return { ok: false, message: parsed.error.issues[0].message };
 
   return joinWaitlist(user.id, parsed.data);
+}
+
+export type AdminCancelState = { ok: boolean; error?: string } | undefined;
+
+// Admin cancels any booking, with a reason (D10, D29).
+export async function cancelBookingByAdmin(
+  _prev: AdminCancelState,
+  formData: FormData,
+): Promise<AdminCancelState> {
+  const admin = await requireAdmin();
+  await demoDelay();
+
+  const parsed = adminCancelSchema.safeParse({
+    reservationId: formData.get("reservationId"),
+    reason: formData.get("reason"),
+  });
+  if (!parsed.success)
+    return { ok: false, error: parsed.error.issues[0].message };
+
+  // The admin always comes from the session, never the form (D67).
+  const result = await cancelBookingAsAdmin(
+    parsed.data.reservationId,
+    admin.id,
+    parsed.data.reason,
+  );
+  if (!result.ok) return { ok: false, error: result.error };
+
+  // Admin list, dashboard and the owner's My bookings all change.
+  revalidatePath("/admin", "layout");
+  revalidatePath("/member", "layout");
+  return { ok: true };
 }

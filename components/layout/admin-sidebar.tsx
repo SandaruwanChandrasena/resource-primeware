@@ -7,6 +7,7 @@ import AppLogo from "@/components/layout/app-logo";
 import NotificationBell from "@/components/layout/notification-bell";
 import ProfileLink, { AVATAR_GLOW } from "@/components/layout/profile-link";
 import {
+  BookingsIcon,
   DashboardIcon,
   LogoutIcon,
   ResourcesIcon,
@@ -19,6 +20,7 @@ import UserAvatar from "@/components/ui/user-avatar";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: DashboardIcon },
   { href: "/admin/resources", label: "Resources", icon: ResourcesIcon },
+  { href: "/admin/bookings", label: "Bookings", icon: BookingsIcon },
   { href: "/admin/users", label: "Users", icon: UsersIcon },
 ];
 

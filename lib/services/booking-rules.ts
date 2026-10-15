@@ -1,3 +1,4 @@
+import type { Prisma } from "@/generated/prisma/client";
 import { MAX_DAYS_AHEAD } from "@/lib/config/booking-settings";
 import {
   addDays,
@@ -158,42 +159,96 @@ export async function createBooking(
   }
 }
 
+// Shared cancel steps. Runs inside the caller's transaction (D6).
+// Only CONFIRMED bookings that have not started can be cancelled.
+async function cancelInTransaction(
+  tx: Prisma.TransactionClient,
+  where: Prisma.ReservationWhereInput,
+  data: { cancelledById: string; cancelReason?: string | null },
+) {
+  const result = await tx.reservation.updateMany({
+    where: { ...where, status: "CONFIRMED", startTime: { gt: new Date() } },
+    data: { status: "CANCELLED", cancelledAt: new Date(), ...data },
+  });
+  if (result.count !== 1) return null;
+
+  // The freed time: tell people on the "Notify me" list (D78).
+  const freed = await tx.reservation.findFirstOrThrow({
+    where,
+    select: {
+      userId: true,
+      resourceId: true,
+      startTime: true,
+      endTime: true,
+      resource: { select: { name: true } },
+    },
+  });
+  await notifyWaiting(tx, {
+    resourceId: freed.resourceId,
+    resourceName: freed.resource.name,
+    start: freed.startTime,
+    end: freed.endTime,
+  });
+  return freed;
+}
+
 // Cancel = change the status, never delete (D7). Who and when are saved (D28).
 // One transaction: cancel + tell waiting people, all or nothing (D6).
 export async function cancelOwnBooking(reservationId: string, userId: string) {
   return db.$transaction(async (tx) => {
-    const result = await tx.reservation.updateMany({
-      // Only your own, still confirmed, and not started yet.
-      where: {
-        id: reservationId,
-        userId,
-        status: "CONFIRMED",
-        startTime: { gt: new Date() },
-      },
-      data: {
-        status: "CANCELLED",
-        cancelledAt: new Date(),
-        cancelledById: userId,
-      },
-    });
-    if (result.count !== 1) return false;
+    // Only your own booking.
+    const freed = await cancelInTransaction(
+      tx,
+      { id: reservationId, userId },
+      { cancelledById: userId },
+    );
+    return freed !== null;
+  });
+}
 
-    // The freed time: tell people on the "Notify me" list (D78).
-    const freed = await tx.reservation.findUniqueOrThrow({
+export type AdminCancelResult = { ok: true } | { ok: false; error: string };
+
+// Admin cancels any booking (D10). Reason needed for someone else's (D29).
+export async function cancelBookingAsAdmin(
+  reservationId: string,
+  adminId: string,
+  reason: string | null,
+): Promise<AdminCancelResult> {
+  return db.$transaction(async (tx) => {
+    const booking = await tx.reservation.findUnique({
       where: { id: reservationId },
-      select: {
-        resourceId: true,
-        startTime: true,
-        endTime: true,
-        resource: { select: { name: true } },
-      },
+      select: { userId: true },
     });
-    await notifyWaiting(tx, {
-      resourceId: freed.resourceId,
-      resourceName: freed.resource.name,
-      start: freed.startTime,
-      end: freed.endTime,
-    });
-    return true;
+    if (!booking) return { ok: false, error: "This booking no longer exists." };
+
+    const forSomeoneElse = booking.userId !== adminId;
+    if (forSomeoneElse && !reason) {
+      return { ok: false, error: "Write a reason for the booking owner." };
+    }
+
+    const freed = await cancelInTransaction(
+      tx,
+      { id: reservationId },
+      { cancelledById: adminId, cancelReason: reason },
+    );
+    // Already cancelled or already started: nothing changed.
+    if (!freed) {
+      return {
+        ok: false,
+        error: "This booking was already cancelled or has started.",
+      };
+    }
+
+    // Tell the owner why, in the same transaction (D6, D29).
+    if (forSomeoneElse) {
+      await tx.notification.create({
+        data: {
+          userId: freed.userId,
+          message: `Your booking of ${freed.resource.name} on ${formatDate(freed.startTime)}, ${formatTime(freed.startTime)}–${formatTime(freed.endTime)} was cancelled by an admin. Reason: ${reason}`,
+          link: "/member/bookings?tab=cancelled",
+        },
+      });
+    }
+    return { ok: true };
   });
 }
