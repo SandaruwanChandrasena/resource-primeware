@@ -22,6 +22,16 @@
 [📁 **Shared Google Drive folder**](https://drive.google.com/drive/folders/1ASYh8nzYBCpyhTcFzv3vBHLu-BTy6gaD?usp=sharing)
 &nbsp;·&nbsp;
 [🚀 **Setup and run**](#setup)
+&nbsp;·&nbsp;
+[▶️ **Watch on YouTube**](https://youtu.be/f-jqqIApGeY)
+
+<br><br>
+
+<a href="https://youtu.be/f-jqqIApGeY">
+  <img src="docs/youtube-thumbnail.jpg" alt="Watch the ResourceHub video on YouTube" width="720">
+</a>
+
+<sub>▶️ Click the image to watch the full walkthrough on YouTube.</sub>
 
 </div>
 
