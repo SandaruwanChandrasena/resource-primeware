@@ -11,6 +11,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-7.10-2D3748?logo=prisma&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=SandaruwanChandrasena.resource-primeware&left_text=Visitors&left_color=%23374151&right_color=%232563EB)
 
 <br>
 
